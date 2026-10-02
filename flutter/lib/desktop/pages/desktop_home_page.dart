@@ -60,14 +60,52 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     super.build(context);
     final isIncomingOnly = bind.isIncomingOnly();
     return _buildBlock(
-        child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildLeftPane(context),
-        if (!isIncomingOnly) const VerticalDivider(width: 1),
-        if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
-      ],
-    ));
+        child: Column(children: [
+      _innovateHeader(),
+      Expanded(
+          child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildLeftPane(context),
+          if (!isIncomingOnly) const VerticalDivider(width: 1),
+          if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
+        ],
+      )),
+    ]));
+  }
+
+  // Innovate Remote header bar (Innovate teal, logo, name)
+  Widget _innovateHeader() {
+    return Container(
+      height: 56,
+      width: double.infinity,
+      color: const Color(0xFF0F6B6B),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      child: Row(children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(8)),
+          child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: Image.asset('assets/innovate_icon.png')),
+        ),
+        const SizedBox(width: 12),
+        const Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Innovate Remote',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600)),
+              Text('Support, on our own server',
+                  style: TextStyle(color: Color(0xFFBEE1E1), fontSize: 11)),
+            ]),
+      ]),
+    );
   }
 
   Widget _buildBlock({required Widget child}) {
