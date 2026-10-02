@@ -21,7 +21,7 @@ open(KEYDIR + "/innovate_verify_key.b64", "w").write(pub_b64)
 SERVER = "192.236.183.198"
 SERVER_KEY = "4Wpe27z5xf+OtgRrVuXjsaInjoQmZgYia1Xwl9UKSA0="        # the Innovate Remote server's PUBLIC key
 settings = {
-    "app-name": "Innovate Remote",
+    "app-name": "InnovateRemote",
     "override-settings": {                                         # cannot be changed by the user
         "custom-rendezvous-server": SERVER,
         "relay-server": SERVER,
