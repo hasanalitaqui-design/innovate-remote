@@ -2358,6 +2358,8 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
 }
 
 pub fn load_custom_client() {
+    // Innovate Remote: the signed settings (name, our server, our server key) are built into the program
+    read_custom_client(include_str!("../innovate/innovate_custom.txt").trim());
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());
@@ -2460,7 +2462,7 @@ pub fn read_custom_client(config: &str) {
         log::error!("Failed to decode custom client config");
         return;
     };
-    const KEY: &str = "5Qbwsde3unUcJBtrx9ZkvUmwFNoExHzpryHuPUdqlWM=";
+    const KEY: &str = "y/GQIHttUgVyqcBkDdSaCHnDv9g59P2sPHO9GdqGGW4="; // Innovate: our own verify key (the settings are signed by us, not by RustDesk)
     let Some(pk) = get_rs_pk(KEY) else {
         log::error!("Failed to parse public key of custom client");
         return;
