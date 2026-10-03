@@ -1,6 +1,12 @@
 lazy_static::lazy_static! {
 pub static ref T: std::collections::HashMap<&'static str, &'static str> =
     [
+        ("Your Desktop", "Your ID"),
+        ("Control Remote Desktop", "Control a remote PC"),
+        ("Ready", "Ready: connected to the Innovate server"),
+        ("One-time Password", "Unattended password"),
+        ("empty_recent_tip", "No recent connections yet.
+Type a PC's ID above to connect."),
         ("desk_tip", "Your desktop can be accessed with this ID and password."),
         ("connecting_status", "Connecting to the RustDesk network..."),
         ("not_ready_status", "Not ready. Please check your connection"),
@@ -125,7 +131,6 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("xdp-portal-unavailable", "Wayland screen capture failed. The XDG Desktop Portal may have crashed or is unavailable. Try restarting it with `systemctl --user restart xdg-desktop-portal`."),
         ("JumpLink", "View"),
         ("Please Select the screen to be shared(Operate on the peer side).", "Please select the screen to be shared(Operate on the peer side)."),
-        ("One-time Password", "One-time password"),
         ("hide_cm_tip", "Allow hiding only if accepting sessions via password and using permanent password"),
         ("wayland_experiment_tip", "Wayland support is in experimental stage, please use X11 if you require unattended access."),
         ("software_render_tip", "If you're using Nvidia graphics card under Linux and the remote window closes immediately after connecting, switching to the open-source Nouveau driver and choosing to use software rendering may help. A software restart is required."),
@@ -146,7 +151,6 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("RDP Settings", "RDP settings"),
         ("New Connection", "New connection"),
         ("Your Device", "Your device"),
-        ("empty_recent_tip", "Oops, no recent sessions!\nTime to plan a new one."),
         ("empty_favorite_tip", "No favorite peers yet?\nLet's find someone to connect with and add it to your favorites!"),
         ("empty_lan_tip", "Oh no, it looks like we haven't discovered any peers yet."),
         ("empty_address_book_tip", "Oh dear, it appears that there are currently no peers listed in your address book."),

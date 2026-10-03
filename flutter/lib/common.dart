@@ -625,7 +625,7 @@ class MyTheme {
       case "dark":
         return ThemeMode.dark;
       default:
-        return ThemeMode.system;
+        return ThemeMode.light; // Innovate Remote: light window unless the user picks dark
     }
   }
 }

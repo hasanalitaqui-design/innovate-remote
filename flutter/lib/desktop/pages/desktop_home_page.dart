@@ -77,18 +77,18 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   // Innovate Remote header bar (Innovate teal, logo, name)
   Widget _innovateHeader() {
     return Container(
-      height: 56,
+      height: 66,
       width: double.infinity,
       color: const Color(0xFF0F6B6B),
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Row(children: [
         Container(
-          width: 38,
-          height: 38,
+          width: 46,
+          height: 46,
           decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(8)),
+              color: Colors.white, borderRadius: BorderRadius.circular(10)),
           child: Padding(
-              padding: const EdgeInsets.all(3),
+              padding: const EdgeInsets.all(5),
               child: Image.asset('assets/innovate_icon.png')),
         ),
         const SizedBox(width: 12),
