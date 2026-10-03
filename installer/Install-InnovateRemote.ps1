@@ -72,7 +72,7 @@ if ($Remove) {
 $here = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 if (-not $Firm -and (Test-Path (Join-Path $here "firm.txt"))) { $Firm = (Get-Content (Join-Path $here "firm.txt") -TotalCount 1).Trim() }
 if (-not $Firm) { $Firm = (Read-Host "Firm id (from the licence dashboard, looks like firm_xxxxxxxxxxxxxxxx)").Trim() }
-if (-not $Passphrase) { $Passphrase = Plain (Read-Host "Firm passphrase (XXXX-XXXX-XXXX)" -AsSecureString) }
+if (-not $Passphrase) { $Passphrase = Plain (Read-Host "Install code or firm passphrase (XXXX-XXXX-XXXX)" -AsSecureString) }
 if (-not $Password) {
     $p1 = Plain (Read-Host "Choose the unattended-access password for this PC (at least 8 characters)" -AsSecureString)
     $p2 = Plain (Read-Host "Type it again" -AsSecureString)
