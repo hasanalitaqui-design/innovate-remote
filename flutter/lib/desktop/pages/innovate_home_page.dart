@@ -5,6 +5,7 @@ import 'package:flutter_hbb/common.dart';
 import 'package:flutter_hbb/common/formatter/id_formatter.dart';
 import 'package:flutter_hbb/desktop/pages/connection_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_setting_page.dart';
+import 'package:flutter_hbb/desktop/pages/innovate_updates.dart';
 import 'package:flutter_hbb/models/peer_model.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 
@@ -262,16 +263,23 @@ class _InnovateHomeState extends State<InnovateHome> {
   Widget build(BuildContext context) {
     return Material(
       color: _bg,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(width: 360, child: _leftCard(context)),
-            const SizedBox(width: 16),
-            Expanded(child: _rightColumn(context)),
-          ],
-        ),
+      child: Column(
+        children: [
+          const InnovateUpdateBanner(),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 360, child: _leftCard(context)),
+                  const SizedBox(width: 16),
+                  Expanded(child: _rightColumn(context)),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -410,6 +410,11 @@ class _GeneralState extends State<_General> {
     return ListView(
       controller: scrollController,
       children: [
+        if (isWindows)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(_kCardLeftMargin, 0, 0, 8),
+            child: const InnovateUpdates(),
+          ),
         if (!isWeb) service(),
         theme(),
         _Card(title: 'Language', children: [language()]),
