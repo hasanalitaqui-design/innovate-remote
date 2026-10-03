@@ -20,7 +20,7 @@ const _headingStyle = TextStyle(fontSize: 19, color: _ink, fontWeight: FontWeigh
 String _fmtId(String id) {
   final b = StringBuffer();
   for (var i = 0; i < id.length; i++) {
-    if (i > 0 && i % 3 == 0 && id.length >= 9) b.write(' ');
+    if (id.length >= 9 && (i == 3 || i == 6)) b.write(' ');   // 373 465 605 / 142 812 5705
     b.write(id[i]);
   }
   return b.toString();
@@ -72,6 +72,7 @@ class _InnovateHomeState extends State<InnovateHome> {
   Widget _leftCard(BuildContext context) {
     return _card(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -266,7 +267,7 @@ class _InnovateHomeState extends State<InnovateHome> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 310, child: _leftCard(context)),
+            SizedBox(width: 360, child: _leftCard(context)),
             const SizedBox(width: 16),
             Expanded(child: _rightColumn(context)),
           ],
