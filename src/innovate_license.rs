@@ -19,6 +19,7 @@ const RETRY_EVERY: Duration = Duration::from_secs(120);
 
 static ALLOWED: AtomicBool = AtomicBool::new(false);
 static START: Once = Once::new();
+static FIRST_DONE: AtomicBool = AtomicBool::new(false);
 
 fn now_secs() -> u64 {
     SystemTime::now()
@@ -66,12 +67,12 @@ fn my_id() -> String {
 }
 
 /// Asks the licence server once. Returns true when the server answered (yes or no), false when it could not be reached.
-fn check_once() -> bool {
+fn check_once_inner() -> bool {
     let firm = firm_id();
     if firm.is_empty() {
         // not installed through the Innovate installer: no licence, no connections
         ALLOWED.store(false, Ordering::SeqCst);
-        return true;
+        return false; // asked again in 2 minutes: the installer may be about to write the firm id
     }
     let url = format!(
         "{}?firm_id={}&remote_id={}&version={}",
@@ -103,7 +104,7 @@ fn check_once() -> bool {
                 );
             }
             ALLOWED.store(allowed, Ordering::SeqCst);
-            true
+            allowed // a "no" is asked again every 2 minutes, so a registration or a resume takes effect quickly
         }
         Err(e) => {
             log::warn!("licence check got an unreadable answer: {}", e);
@@ -111,6 +112,12 @@ fn check_once() -> bool {
             false
         }
     }
+}
+
+fn check_once() -> bool {
+    let r = check_once_inner();
+    FIRST_DONE.store(true, Ordering::SeqCst);
+    r
 }
 
 fn ensure_started() {
@@ -127,7 +134,18 @@ fn ensure_started() {
 /// True when this install is licensed right now.
 pub fn allowed() -> bool {
     ensure_started();
+    // the very first answer takes a second or two: wait for it (up to 6 s) instead of refusing the first connection
+    let mut waited = 0;
+    while !FIRST_DONE.load(Ordering::SeqCst) && waited < 30 {
+        std::thread::sleep(Duration::from_millis(200));
+        waited += 1;
+    }
     ALLOWED.load(Ordering::SeqCst)
+}
+
+/// Starts the checker at program start, so the licence is already known when the first connection arrives.
+pub fn start() {
+    ensure_started();
 }
 
 /// The message shown when a connection is refused for licence reasons.
