@@ -153,6 +153,14 @@ class _InnovateHomeState extends State<InnovateHome> {
               icon: const Icon(Icons.folder_open, size: 20, color: _muted),
               onPressed: () => connect(context, p.id, isFileTransfer: true),
             ),
+            IconButton(
+              tooltip: 'Remove from this list',
+              icon: const Icon(Icons.close, size: 20, color: _muted),
+              onPressed: () async {
+                await bind.mainRemovePeer(id: p.id);
+                bind.mainLoadRecentPeers();
+              },
+            ),
           ],
         ),
       ),
