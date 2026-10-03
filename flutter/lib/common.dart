@@ -398,6 +398,14 @@ class MyTheme {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: MyTheme.accent, width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: MyTheme.accent, width: 2),
+            ),
           )
         : null,
     textTheme: const TextTheme(
@@ -495,6 +503,14 @@ class MyTheme {
             isDense: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: MyTheme.accent, width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: MyTheme.accent, width: 2),
             ),
           )
         : null,

@@ -367,7 +367,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                             }
                           },
                           child: TextFormField(
-                            controller: model.serverPasswd,
+                            controller: showOneTime
+                                ? model.serverPasswd
+                                : TextEditingController(text: '•' * 10),
                             readOnly: true,
                             decoration: InputDecoration(
                               border: InputBorder.none,
