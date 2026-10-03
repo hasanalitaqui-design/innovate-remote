@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 const _stateDir = r'C:\ProgramData\Innovate\Remote';
 const _latestUrl = 'https://license.taquiai.ai/api/remote/latest';
@@ -22,8 +23,17 @@ class _UpdateInfo {
 
 /// Reads this PC's build and asks the server for the newest one. Throws when the server cannot be reached.
 Future<_UpdateInfo> _checkForUpdate() async {
-  final f = File('$_stateDir\\build.txt');
-  final have = f.existsSync() ? (int.tryParse(f.readAsStringSync().trim()) ?? 0) : 0;
+  // the build number is built into the app itself (assets/build_number.txt); the note on disk is only a fallback
+  var have = 0;
+  try {
+    have = int.tryParse((await rootBundle.loadString('assets/build_number.txt')).trim()) ?? 0;
+  } catch (e) {
+    have = 0;
+  }
+  if (have == 0) {
+    final f = File('$_stateDir\\build.txt');
+    have = f.existsSync() ? (int.tryParse(f.readAsStringSync().trim()) ?? 0) : 0;
+  }
   final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
   try {
     final req = await client.getUrl(Uri.parse(_latestUrl));
