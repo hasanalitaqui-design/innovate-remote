@@ -168,7 +168,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       value: gFFI.serverModel,
       child: Container(
         width: isIncomingOnly ? 280.0 : 200.0,
-        color: Theme.of(context).colorScheme.background,
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : Theme.of(context).colorScheme.background,
         child: Stack(
           children: [
             Column(
@@ -274,10 +276,13 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                         readOnly: true,
                         decoration: InputDecoration(
                           border: InputBorder.none,
+ enabledBorder: InputBorder.none,
+ focusedBorder: InputBorder.none,
                           contentPadding: EdgeInsets.only(top: 10, bottom: 10),
                         ),
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
                         ),
                       ).workaroundFreezeLinuxMint(),
                     ),
@@ -373,6 +378,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                             readOnly: true,
                             decoration: InputDecoration(
                               border: InputBorder.none,
+ enabledBorder: InputBorder.none,
+ focusedBorder: InputBorder.none,
                               contentPadding:
                                   EdgeInsets.only(top: 14, bottom: 10),
                             ),

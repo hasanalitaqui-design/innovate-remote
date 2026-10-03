@@ -248,7 +248,7 @@ class ColorThemeExtension extends ThemeExtension<ColorThemeExtension> {
 class MyTheme {
   MyTheme._();
 
-  static const Color grayBg = Color(0xFFEFEFF2);
+  static const Color grayBg = Color(0xFFF1F6F6);
   static const Color accent = Color(0xFF0F6B6B);
   static const Color accent50 = Color(0x770F6B6B);
   static const Color accent80 = Color(0xAA0F6B6B);
