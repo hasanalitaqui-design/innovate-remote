@@ -153,6 +153,9 @@ if (-not $NoAutoUpdate) {
                 if ((Get-FileHash -Algorithm SHA256 -Path $InstallerPath).Hash.ToLower() -eq ([string]$latest.sha256).ToLower()) { $build = [int]$latest.build }
             } catch {}
         }
+        # the app knows its own build number (built in): trust that over the guess above
+        $asset = Join-Path $env:ProgramFiles "InnovateRemote\data\flutter_assets\assets\build_number.txt"
+        if (Test-Path $asset) { try { $ab = [int](Get-Content $asset -TotalCount 1); if ($ab -gt 0) { $build = $ab } } catch {} }
         Set-Content -Path (Join-Path $rdir "build.txt") -Value "$build"
         $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$upd`""
         $trigger = New-ScheduledTaskTrigger -Daily -At 2:30am -RandomDelay (New-TimeSpan -Minutes 45)

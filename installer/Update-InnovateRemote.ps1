@@ -37,7 +37,12 @@ function Log($m) {
 }
 function Lastword($t) { $x = ($t | Out-String).Trim(); if (-not $x) { return "" }; ($x -split "\s+")[-1] }
 function Run-Exe { param([string[]]$a) (& $Exe @a | Out-String).Trim() }   # piped, so the output of the Windows program is really returned
-function Get-Build { if (Test-Path $BuildFile) { try { [int](Get-Content $BuildFile -TotalCount 1) } catch { 0 } } else { 0 } }
+function Get-Build {
+    # the build number is built into the app (assets\build_number.txt); the note in build.txt is only a fallback
+    $asset = Join-Path (Split-Path $Exe -Parent) "data\flutter_assets\assets\build_number.txt"
+    if (Test-Path $asset) { try { $b = [int](Get-Content $asset -TotalCount 1); if ($b -gt 0) { return $b } } catch {} }
+    if (Test-Path $BuildFile) { try { [int](Get-Content $BuildFile -TotalCount 1) } catch { 0 } } else { 0 }
+}
 function Get-Svc { Get-Service | Where-Object { $_.Name -match 'InnovateRemote|Innovate Remote' } | Select-Object -First 1 }
 function In-Session {
     # a session is open while a connection-manager / connect / file-transfer helper process of the app is running
