@@ -144,6 +144,13 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         },
       ),
     ];
+    if (!isIncomingOnly && !isOutgoingOnly) {
+      // Innovate Remote: the connection status sits under the ID and password (as in the design)
+      children.add(Align(
+        alignment: Alignment.centerLeft,
+        child: OnlineStatusWidget().marginOnly(left: 14, top: 12, bottom: 8, right: 8),
+      ));
+    }
     if (isIncomingOnly) {
       children.addAll([
         Divider(),
@@ -162,7 +169,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return ChangeNotifierProvider.value(
       value: gFFI.serverModel,
       child: Container(
-        width: isIncomingOnly ? 280.0 : 200.0,
+        width: 280.0,
         color: Theme.of(context).brightness == Brightness.light
             ? Colors.white
             : Theme.of(context).colorScheme.background,
