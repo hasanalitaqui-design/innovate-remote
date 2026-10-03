@@ -161,8 +161,16 @@ if (-not $NoAutoUpdate) {
         $trigger = New-ScheduledTaskTrigger -Daily -At 2:30am -RandomDelay (New-TimeSpan -Minutes 45)
         $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
         $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Hours 1)
-        Register-ScheduledTask -TaskName "Innovate_RemoteUpdate" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
-        Say "Auto-update: a nightly task (about 2:30 AM) keeps this PC on the newest build."
+        try {
+            # also check 10 minutes after every Windows start, so a PC that was off at night still catches up
+            $startup = New-ScheduledTaskTrigger -AtStartup
+            $startup.Delay = "PT10M"
+            Register-ScheduledTask -TaskName "Innovate_RemoteUpdate" -Action $action -Trigger @($trigger, $startup) -Principal $principal -Settings $settings -Force | Out-Null
+            Say "Auto-update: checks about 2:30 AM every night and 10 minutes after every Windows start; installs by itself, never during a session."
+        } catch {
+            Register-ScheduledTask -TaskName "Innovate_RemoteUpdate" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+            Say "Auto-update: a nightly task (about 2:30 AM) keeps this PC on the newest build."
+        }
         if ($build -gt 0) {
             $rb = @{ firm_id = $Firm; remote_id = $id; build = $build } | ConvertTo-Json
             try { Invoke-RestMethod -Uri "$UpdateApi/report-build" -Method Post -ContentType "application/json" -Body $rb | Out-Null } catch {}
