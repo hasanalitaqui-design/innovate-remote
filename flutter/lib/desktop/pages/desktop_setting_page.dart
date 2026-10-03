@@ -2564,12 +2564,7 @@ class _AboutState extends State<_About> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Innovate Remote - support on our own server.
-Powered by Innovate Technologies.
-
-Based on RustDesk, open source (AGPL-3.0). Copyright © ${DateTime.now().toString().substring(0, 4)} Purslane Tech Pte. Ltd.
-$license
-Source code: https://github.com/hasanalitaqui-design/innovate-remote',
+                            'Innovate Remote - support on our own server.\nPowered by Innovate Technologies.\n\nBased on RustDesk, open source (AGPL-3.0). Copyright © ${DateTime.now().toString().substring(0, 4)} Purslane Tech Pte. Ltd.\n$license\nSource code: https://github.com/hasanalitaqui-design/innovate-remote',
                             style: const TextStyle(color: Colors.white),
                           ),
                         ],
