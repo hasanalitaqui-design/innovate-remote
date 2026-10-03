@@ -18,7 +18,7 @@ else:
 pub_b64 = base64.b64encode(bytes(sk.verify_key)).decode()
 open(KEYDIR + "/innovate_verify_key.b64", "w").write(pub_b64)
 
-SERVER = "192.236.183.198"
+SERVER = "remote.taquiai.ai"      # a NAME, not an IP: moving the relay later is only a DNS change (was 192.236.183.198 on RackNerd)
 SERVER_KEY = "4Wpe27z5xf+OtgRrVuXjsaInjoQmZgYia1Xwl9UKSA0="        # the Innovate Remote server's PUBLIC key
 settings = {
     "app-name": "InnovateRemote",
@@ -29,6 +29,11 @@ settings = {
         "hide-server-settings": "Y",
         "hide-proxy-settings": "Y",
         "hide-websocket-settings": "Y",
+        "verification-method": "use-permanent-password",       # only the unattended password, no random one-time password
+    },
+    "default-settings": {                                          # changeable per PC
+        "allow-auto-disconnect": "Y",
+        "auto-disconnect-timeout": "15",                           # minutes idle -> session closes
     },
 }
 raw = json.dumps(settings, separators=(",", ":")).encode()
