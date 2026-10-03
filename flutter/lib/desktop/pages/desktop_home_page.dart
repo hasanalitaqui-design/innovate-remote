@@ -104,6 +104,13 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               Text('Support, on our own server',
                   style: TextStyle(color: Color(0xFFBEE1E1), fontSize: 11)),
             ]),
+        const Spacer(),
+        TextButton.icon(
+          onPressed: () => DesktopSettingPage.switch2page(SettingsTabKey.general),
+          icon: const Icon(Icons.settings, color: Colors.white, size: 18),
+          label: const Text('Settings',
+              style: TextStyle(color: Colors.white, fontSize: 14)),
+        ),
       ]),
     );
   }

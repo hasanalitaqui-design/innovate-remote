@@ -7,7 +7,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("One-time Password", "Unattended password"),
         ("empty_recent_tip", "No recent connections yet.
 Type a PC's ID above to connect."),
-        ("desk_tip", ""),
+        ("desk_tip", " "),
         ("connecting_status", "Connecting to the Innovate Remote network..."),
         ("not_ready_status", "Not ready. Please check your connection"),
         ("ID/Relay Server", "ID/Relay server"),
