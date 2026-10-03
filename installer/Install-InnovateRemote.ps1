@@ -16,7 +16,7 @@
     5. prints this PC's ID - the number you type in the viewer to connect
 
   Options: -Firm (id from the licence dashboard; or put it in firm.txt next to this script)  -Passphrase  -Password  -Label (default: computer name)
-           -IdleMinutes (default 15: a session with no activity closes; use 60 for client-firm support PCs, 0 = leave the built-in default)
+           -NoAutoUpdate (skip the nightly update task)  -IdleMinutes (default 15: a session with no activity closes; use 60 for client-firm support PCs, 0 = leave the built-in default)
            -InstallerPath <exe>   -Remove (uninstall)   -Pause (keep the window open at the end)
 #>
 param(
@@ -27,11 +27,14 @@ param(
     [int]$IdleMinutes = 15,
     [string]$InstallerPath,
     [switch]$Remove,
+    [switch]$NoAutoUpdate,
     [switch]$Pause
 )
 $ErrorActionPreference = "Stop"
 $LicenseUrl = "https://license.taquiai.ai/api/remote/register"
 $ReleaseUrl = "https://github.com/hasanalitaqui-design/innovate-remote/releases/download/innovate-latest/InnovateRemote-Setup.exe"
+$UpdateScriptUrl = "https://raw.githubusercontent.com/hasanalitaqui-design/innovate-remote/innovate-scripts/installer/Update-InnovateRemote.ps1"
+$UpdateApi = "https://license.taquiai.ai/api/remote"
 $Exe = Join-Path $env:ProgramFiles "InnovateRemote\InnovateRemote.exe"
 
 function Say($m) { Write-Host ("[" + (Get-Date -Format "HH:mm:ss") + "] " + $m) }
@@ -125,6 +128,39 @@ try {
     throw "the licence server refused the registration: $msg  (Innovate Remote is installed but will not connect until this PC is registered - run the script again with the right firm id and passphrase)"
 }
 if ($r.status -ne "active") { Write-Host "WARNING - this PC is registered but its licence status is: $($r.status)" -ForegroundColor Yellow }
+
+# ---- auto-update: a nightly task keeps this PC on the newest build --------------------------
+if (-not $NoAutoUpdate) {
+    try {
+        $rdir = Join-Path $env:ProgramData "Innovate\Remote"
+        New-Item -ItemType Directory -Force -Path $rdir | Out-Null
+        $upd = Join-Path $rdir "Update-InnovateRemote.ps1"
+        $src = Join-Path $here "Update-InnovateRemote.ps1"
+        if (Test-Path $src) { Copy-Item $src $upd -Force } else { Invoke-WebRequest -Uri $UpdateScriptUrl -OutFile $upd -UseBasicParsing }
+        # remember the installer this PC runs (for rolling back) and which build it is (for the dashboard)
+        $build = 0
+        if ($InstallerPath -and (Test-Path $InstallerPath)) {
+            Copy-Item $InstallerPath (Join-Path $rdir "current.exe") -Force
+            try {
+                $latest = Invoke-RestMethod -Uri "$UpdateApi/latest" -TimeoutSec 30
+                if ((Get-FileHash -Algorithm SHA256 -Path $InstallerPath).Hash.ToLower() -eq ([string]$latest.sha256).ToLower()) { $build = [int]$latest.build }
+            } catch {}
+        }
+        Set-Content -Path (Join-Path $rdir "build.txt") -Value "$build"
+        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$upd`""
+        $trigger = New-ScheduledTaskTrigger -Daily -At 2:30am -RandomDelay (New-TimeSpan -Minutes 45)
+        $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+        $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Hours 1)
+        Register-ScheduledTask -TaskName "Innovate_RemoteUpdate" -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+        Say "Auto-update: a nightly task (about 2:30 AM) keeps this PC on the newest build."
+        if ($build -gt 0) {
+            $rb = @{ firm_id = $Firm; remote_id = $id; build = $build } | ConvertTo-Json
+            try { Invoke-RestMethod -Uri "$UpdateApi/report-build" -Method Post -ContentType "application/json" -Body $rb | Out-Null } catch {}
+        }
+    } catch {
+        Write-Host "WARNING - installed, but the nightly auto-update could not be set up: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+}
 
 Write-Host ""
 Write-Host "=====================================================" -ForegroundColor Green
