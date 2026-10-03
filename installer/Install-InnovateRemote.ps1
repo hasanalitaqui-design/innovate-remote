@@ -130,7 +130,8 @@ try {
     $r = Invoke-RestMethod -Uri $LicenseUrl -Method Post -ContentType "application/json" -Body $body
 } catch {
     $msg = $_.Exception.Message
-    try { $msg = (New-Object IO.StreamReader($_.Exception.Response.GetResponseStream())).ReadToEnd() } catch {}
+    if ($_.ErrorDetails -and $_.ErrorDetails.Message) { $msg = $_.ErrorDetails.Message }
+    elseif ($_.Exception.Response) { try { $msg = (New-Object IO.StreamReader($_.Exception.Response.GetResponseStream())).ReadToEnd() } catch {} }
     throw "the licence server refused the registration: $msg  (Innovate Remote is installed but will not connect until this PC is registered - run the script again with the right firm id and passphrase)"
 }
 if ($r.status -ne "active") { Write-Host "WARNING - this PC is registered but its licence status is: $($r.status)" -ForegroundColor Yellow }
