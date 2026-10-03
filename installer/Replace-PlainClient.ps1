@@ -38,7 +38,7 @@ Say "Installer ok (build $($latest.build))."
 foreach ($f in @("Install-InnovateRemote.ps1", "Update-InnovateRemote.ps1")) {
     Invoke-WebRequest -UseBasicParsing -Uri "https://raw.githubusercontent.com/hasanalitaqui-design/innovate-remote/innovate-scripts/installer/$f" -OutFile (Join-Path $Work $f)
 }
-$code = Plain (Read-Host "Install code (XXXX-XXXX-XXXX)" -AsSecureString)
+$code = (Read-Host "Install code (XXXX-XXXX-XXXX) - shown as you type so you can check it").Trim().ToUpper()
 $p1 = Plain (Read-Host "Choose the password for THIS PC (at least 8 characters)" -AsSecureString)
 $p2 = Plain (Read-Host "Type it again" -AsSecureString)
 if ($p1 -ne $p2) { throw "the two passwords are not the same - nothing was changed" }
