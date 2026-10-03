@@ -35,7 +35,8 @@ function Log($m) {
         if ((Get-Item $LogFile).Length -gt 200KB) { Get-Content $LogFile -Tail 400 | Set-Content ($LogFile + ".tmp"); Move-Item ($LogFile + ".tmp") $LogFile -Force }
     } catch {}
 }
-function Lastword($t) { (($t | Out-String).Trim() -split "\s+")[-1] }
+function Lastword($t) { $x = ($t | Out-String).Trim(); if (-not $x) { return "" }; ($x -split "\s+")[-1] }
+function Run-Exe { param([string[]]$a) (& $Exe @a | Out-String).Trim() }   # piped, so the output of the Windows program is really returned
 function Get-Build { if (Test-Path $BuildFile) { try { [int](Get-Content $BuildFile -TotalCount 1) } catch { 0 } } else { 0 } }
 function Get-Svc { Get-Service | Where-Object { $_.Name -match 'InnovateRemote|Innovate Remote' } | Select-Object -First 1 }
 function In-Session {
@@ -46,8 +47,8 @@ function In-Session {
 }
 function Report-Build($build) {
     try {
-        $firm = Lastword (& $Exe --option innovate-firm-id)
-        $id = Lastword (& $Exe --get-id)
+        $firm = Lastword (Run-Exe @('--option','innovate-firm-id'))
+        $id = Lastword (Run-Exe @('--get-id'))
         if ($firm -and $id -and $build -gt 0) {
             $body = @{ firm_id = $firm; remote_id = $id; build = [int]$build } | ConvertTo-Json
             Invoke-RestMethod -Uri "$Api/report-build" -Method Post -ContentType "application/json" -Body $body | Out-Null
@@ -77,8 +78,9 @@ try {
     Log "checksum ok ($($hash.Substring(0,12))...)."
     if ($DryRun) { Log "DRY RUN - stopping here, nothing was changed."; Remove-Item $New -Force -ErrorAction SilentlyContinue; exit 0 }
 
-    $id0 = Lastword (& $Exe --get-id)
-    $firm0 = Lastword (& $Exe --option innovate-firm-id)
+    $id0 = Lastword (Run-Exe @('--get-id'))
+    $firm0 = Lastword (Run-Exe @('--option','innovate-firm-id'))
+    if (-not $id0) { throw "cannot read this PC's ID right now - not updating blind; will try again at the next run" }
     Log "installing build $want over build $have (ID $id0) ..."
     $svc = Get-Svc
     if ($svc) { Stop-Service $svc.Name -Force -ErrorAction SilentlyContinue }
@@ -93,8 +95,8 @@ try {
     }
     if ($ok) {
         Start-Sleep 10
-        $id1 = Lastword (& $Exe --get-id)
-        $firm1 = Lastword (& $Exe --option innovate-firm-id)
+        $id1 = Lastword (Run-Exe @('--get-id'))
+        $firm1 = Lastword (Run-Exe @('--option','innovate-firm-id'))
         if ($id1 -ne $id0) { $ok = $false; Log "check failed: the PC's ID changed ($id0 -> $id1)." }
         elseif ($firm0 -and ($firm1 -ne $firm0)) { $ok = $false; Log "check failed: the firm id was lost." }
     } else { Log "check failed: the service did not start." }
