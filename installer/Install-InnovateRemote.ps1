@@ -119,7 +119,13 @@ if (-not $id -or $id.Length -lt 6) { throw "could not read this PC's ID - wait a
 # ---- licence -----------------------------------------------------------------------------
 Say "Registering this PC (ID $id) under the firm..."
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$body = @{ firm_id = $Firm; passphrase = $Passphrase; remote_id = $id; label = $Label } | ConvertTo-Json
+$machine = ""
+try {
+    $guid = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Cryptography" -ErrorAction Stop).MachineGuid
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $machine = ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes("innovate-remote|" + $guid))) -replace "-", "").ToLower()
+} catch {}
+$body = @{ firm_id = $Firm; passphrase = $Passphrase; remote_id = $id; label = $Label; machine = $machine } | ConvertTo-Json
 try {
     $r = Invoke-RestMethod -Uri $LicenseUrl -Method Post -ContentType "application/json" -Body $body
 } catch {
