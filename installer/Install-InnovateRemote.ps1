@@ -97,7 +97,14 @@ $here = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 if (-not $Passphrase -and $env:INNOVATE_CODE) { $Passphrase = $env:INNOVATE_CODE.Trim().ToUpper() }
 if (-not $Password -and $env:INNOVATE_PASSWORD) { $Password = $env:INNOVATE_PASSWORD }
 if (-not $Firm -and (Test-Path (Join-Path $here "firm.txt"))) { $Firm = (Get-Content (Join-Path $here "firm.txt") -TotalCount 1).Trim() }
-if (-not $Firm) { $Firm = (Read-Host "Firm id (from the licence dashboard, looks like firm_xxxxxxxxxxxxxxxx)").Trim() }
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+if (-not $Firm) {
+    # the install code tells the licence server which firm this PC joins, so nobody has to type a firm id
+    if (-not $Passphrase) { $Passphrase = (Read-Host "Install code (XXXX-XXXX-XXXX) - shown as you type so you can check it").Trim().ToUpper() }
+    try { $Firm = (Invoke-RestMethod -Uri "$UpdateApi/resolve?code=$([uri]::EscapeDataString($Passphrase))" -TimeoutSec 30).firm_id } catch { $Firm = $null }
+    if ($Firm) { Say "Install code accepted." }
+    else { $Firm = (Read-Host "The firm could not be found from that code. Firm id (looks like firm_xxxxxxxxxxxxxxxx)").Trim() }
+}
 if (-not $Passphrase) { $Passphrase = (Read-Host "Install code (XXXX-XXXX-XXXX) - shown as you type so you can check it").Trim().ToUpper() }
 if (-not $Password) {
     $p1 = Plain (Read-Host "Choose the unattended-access password for this PC (at least 8 characters)" -AsSecureString)
