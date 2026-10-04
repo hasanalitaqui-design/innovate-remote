@@ -143,6 +143,27 @@ pub fn allowed() -> bool {
     ALLOWED.load(Ordering::SeqCst)
 }
 
+/// Tells the licence server that a session started on this PC ("in": someone connected to it, "out": this PC connected to another). Fire and forget on its own thread:
+/// a failure or a slow server never delays or blocks the connection. Only this PC's own ID and the direction are sent - never who connected or anything on screen.
+pub fn report_session(direction: &'static str) {
+    std::thread::spawn(move || {
+        let firm = firm_id();
+        if firm.is_empty() {
+            return;
+        }
+        let url = format!(
+            "https://license.taquiai.ai/api/remote/session?firm_id={}&remote_id={}&direction={}",
+            firm,
+            my_id(),
+            direction
+        );
+        let client = crate::hbbs_http::create_http_client_with_url(&url);
+        if let Err(e) = client.get(&url).timeout(Duration::from_secs(15)).send() {
+            log::debug!("session report not sent: {}", e);
+        }
+    });
+}
+
 /// Starts the checker at program start, so the licence is already known when the first connection arrives.
 pub fn start() {
     ensure_started();

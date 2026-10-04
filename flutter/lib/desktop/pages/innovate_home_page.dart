@@ -19,9 +19,10 @@ const _labelStyle = TextStyle(fontSize: 13, color: _muted, fontWeight: FontWeigh
 const _headingStyle = TextStyle(fontSize: 19, color: _ink, fontWeight: FontWeight.w700);
 
 String _fmtId(String id) {
+  // groups of three counted from the right, so every length reads the same way: 36 730 855 / 373 465 605 / 1 428 125 705
   final b = StringBuffer();
   for (var i = 0; i < id.length; i++) {
-    if (id.length >= 9 && (i == 3 || i == 6)) b.write(' ');   // 373 465 605 / 142 812 5705
+    if (i > 0 && (id.length - i) % 3 == 0) b.write(' ');
     b.write(id[i]);
   }
   return b.toString();

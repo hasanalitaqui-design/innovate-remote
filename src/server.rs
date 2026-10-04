@@ -218,6 +218,7 @@ pub async fn create_tcp_connection(
     if !crate::innovate_license::allowed() {
         bail!(crate::innovate_license::REFUSED);
     }
+    crate::innovate_license::report_session("in");
     let mut stream = stream;
     // The address the connection layer keys on, whitelist and admission alike.
     let addr = hbb_common::try_into_v4(addr);

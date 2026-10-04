@@ -378,6 +378,7 @@ impl Client {
         if !crate::innovate_license::allowed() {
             bail!(crate::innovate_license::REFUSED);
         }
+        crate::innovate_license::report_session("out");
         debug_assert!(peer == interface.get_id());
         interface.update_direct(None);
         interface.update_received(false);
