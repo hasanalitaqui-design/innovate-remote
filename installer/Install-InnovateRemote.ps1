@@ -89,7 +89,17 @@ if (-not (Test-Path $Exe)) {
         $InstallerPath = Join-Path $env:TEMP "InnovateRemote-Setup.exe"
         Say "Downloading Innovate Remote..."
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Invoke-WebRequest -Uri $ReleaseUrl -OutFile $InstallerPath -UseBasicParsing
+        # the newest published build from our own server, checked against its published checksum
+        $latestBuild = Invoke-RestMethod -Uri "$UpdateApi/latest" -TimeoutSec 30
+        if ($latestBuild.build) {
+            Invoke-WebRequest -Uri $latestBuild.url -OutFile $InstallerPath -UseBasicParsing -TimeoutSec 600
+            if ((Get-FileHash -Algorithm SHA256 -Path $InstallerPath).Hash.ToLower() -ne ([string]$latestBuild.sha256).ToLower()) {
+                Remove-Item $InstallerPath -Force -ErrorAction SilentlyContinue
+                throw "the downloaded installer does not match its published checksum - nothing was installed"
+            }
+        } else {
+            Invoke-WebRequest -Uri $ReleaseUrl -OutFile $InstallerPath -UseBasicParsing
+        }
     }
     Say "Installing silently as a service (the installer stays running as the app, so it is not waited for)..."
     Start-Process -FilePath $InstallerPath -ArgumentList "--silent-install"
