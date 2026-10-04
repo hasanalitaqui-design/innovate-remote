@@ -28,18 +28,37 @@ param(
     [string]$InstallerPath,
     [switch]$Remove,
     [switch]$NoAutoUpdate,
+    [switch]$NoDefenderException,
     [switch]$Pause
 )
 $ErrorActionPreference = "Stop"
 $LicenseUrl = "https://license.taquiai.ai/api/remote/register"
 $ReleaseUrl = "https://github.com/hasanalitaqui-design/innovate-remote/releases/download/innovate-latest/InnovateRemote-Setup.exe"
-$UpdateScriptUrl = "https://raw.githubusercontent.com/hasanalitaqui-design/innovate-remote/innovate-scripts/installer/Update-InnovateRemote.ps1"
+$UpdateScriptUrl = "https://license.taquiai.ai/get/Update-InnovateRemote.ps1"
 $UpdateApi = "https://license.taquiai.ai/api/remote"
 $Exe = Join-Path $env:ProgramFiles "InnovateRemote\InnovateRemote.exe"
 
 function Say($m) { Write-Host ("[" + (Get-Date -Format "HH:mm:ss") + "] " + $m) }
 function Finish($code) { if ($Pause) { Read-Host "Press Enter to close this window" | Out-Null }; exit $code }
 trap { Write-Host ""; Write-Host ("FAILED - " + $_.Exception.Message) -ForegroundColor Red; Finish 1 }
+function Add-DefenderException {
+    # Windows Defender regularly flags remote-control software it does not know. Tell it to leave OUR two folders alone, and say so.
+    if ($NoDefenderException -or $env:INNOVATE_NO_DEFENDER_EXCLUSION -eq "1") { return }
+    try {
+        Get-Command Add-MpPreference -ErrorAction Stop | Out-Null
+        foreach ($p in @((Join-Path $env:ProgramFiles "InnovateRemote"), (Join-Path $env:ProgramData "Innovate"))) {
+            Add-MpPreference -ExclusionPath $p -ErrorAction Stop
+        }
+        Say "Windows Defender: told it to leave these two folders alone: C:\Program Files\InnovateRemote and C:\ProgramData\Innovate (nothing else is excluded)."
+    } catch {
+        Say "(Windows Defender exception not added: $($_.Exception.Message). If Defender or another antivirus blocks the install, allow the Innovate Remote folders by hand.)"
+    }
+}
+function Remove-DefenderException {
+    try {
+        foreach ($p in @((Join-Path $env:ProgramFiles "InnovateRemote"), (Join-Path $env:ProgramData "Innovate"))) { Remove-MpPreference -ExclusionPath $p -ErrorAction Stop }
+    } catch {}
+}
 function Plain($secure) { [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)) }
 function Get-RemoteService { Get-Service | Where-Object { $_.Name -match 'InnovateRemote|Innovate Remote' } | Select-Object -First 1 }
 
@@ -64,12 +83,19 @@ if ($Remove) {
     Get-Service | Where-Object { $_.Name -match 'InnovateRemote|Innovate Remote' } | ForEach-Object { Stop-Service $_.Name -Force -ErrorAction SilentlyContinue }
     Get-Process InnovateRemote -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     if (Test-Path $Exe) { & $Exe --uninstall | Out-Null; Start-Sleep 8 }
+    Remove-DefenderException
     Write-Host "DONE - removed. (The licence stays registered; suspend or delete it in the licence dashboard if the PC is retired.)" -ForegroundColor Green
     Finish 0
 }
 
+# ---- Windows Defender: allow our own folders first, so the install is not interrupted ------
+Add-DefenderException
+New-Item -ItemType Directory -Force -Path (Join-Path $env:ProgramData "Innovate\Remote") | Out-Null
+
 # ---- what we need ------------------------------------------------------------------------
 $here = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
+if (-not $Passphrase -and $env:INNOVATE_CODE) { $Passphrase = $env:INNOVATE_CODE.Trim().ToUpper() }
+if (-not $Password -and $env:INNOVATE_PASSWORD) { $Password = $env:INNOVATE_PASSWORD }
 if (-not $Firm -and (Test-Path (Join-Path $here "firm.txt"))) { $Firm = (Get-Content (Join-Path $here "firm.txt") -TotalCount 1).Trim() }
 if (-not $Firm) { $Firm = (Read-Host "Firm id (from the licence dashboard, looks like firm_xxxxxxxxxxxxxxxx)").Trim() }
 if (-not $Passphrase) { $Passphrase = (Read-Host "Install code (XXXX-XXXX-XXXX) - shown as you type so you can check it").Trim().ToUpper() }
@@ -86,7 +112,7 @@ if (-not $Label) { $Label = $env:COMPUTERNAME }
 if (-not (Test-Path $Exe)) {
     if (-not $InstallerPath) { $InstallerPath = Join-Path $here "InnovateRemote-Setup.exe" }
     if (-not (Test-Path $InstallerPath)) {
-        $InstallerPath = Join-Path $env:TEMP "InnovateRemote-Setup.exe"
+        $InstallerPath = Join-Path (Join-Path $env:ProgramData "Innovate\Remote") "InnovateRemote-Setup.exe"
         Say "Downloading Innovate Remote..."
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         # the newest published build from our own server, checked against its published checksum

@@ -25,6 +25,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     throw "Open PowerShell with 'Run as administrator' and run this again."
 }
 New-Item -ItemType Directory -Force -Path $Work | Out-Null
+try { Add-MpPreference -ExclusionPath $Work -ErrorAction Stop; Say "Windows Defender: told it to leave $Work alone while this runs." } catch { Say "(Windows Defender exception not added: $($_.Exception.Message))" }
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # 1. everything is prepared BEFORE anything is removed
