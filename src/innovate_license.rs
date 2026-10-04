@@ -146,9 +146,11 @@ pub fn allowed() -> bool {
 /// Tells the licence server that a session started on this PC ("in": someone connected to it, "out": this PC connected to another). Fire and forget on its own thread:
 /// a failure or a slow server never delays or blocks the connection. Only this PC's own ID and the direction are sent - never who connected or anything on screen.
 pub fn report_session(direction: &'static str) {
+    log::info!("session report ({}) requested", direction);
     std::thread::spawn(move || {
         let firm = firm_id();
         if firm.is_empty() {
+            log::warn!("session report ({}) skipped: no firm id on this PC", direction);
             return;
         }
         let url = format!(
@@ -158,8 +160,9 @@ pub fn report_session(direction: &'static str) {
             direction
         );
         let client = crate::hbbs_http::create_http_client_with_url(&url);
-        if let Err(e) = client.get(&url).timeout(Duration::from_secs(15)).send() {
-            log::debug!("session report not sent: {}", e);
+        match client.get(&url).timeout(Duration::from_secs(15)).send() {
+            Ok(r) => log::info!("session report ({}) sent: {}", direction, r.status()),
+            Err(e) => log::warn!("session report ({}) not sent: {}", direction, e),
         }
     });
 }

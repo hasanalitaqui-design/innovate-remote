@@ -52,6 +52,21 @@ Future<String?> _startUpdate() async {
   if (!File(script).existsSync()) {
     return 'The update program is not set up on this PC yet. Run the Innovate Remote installer once, then try again.';
   }
+  // 1) Quietly: ask the nightly update task (it runs as SYSTEM) to run now. Needs no Windows permission prompt once the task lets users start it.
+  try {
+    final r = await Process.run('schtasks.exe', ['/run', '/tn', 'Innovate_RemoteUpdate']);
+    if (r.exitCode == 0) return null;
+  } catch (e) {
+    // fall through to the prompt route
+  }
+  // 2) With Windows' permission prompt: fetch the newest update script first (it also sets who may start the task, so next time is quiet), then run it.
+  final cmd = "try { Invoke-WebRequest -UseBasicParsing -Uri https://license.taquiai.ai/get/Update-InnovateRemote.ps1 -OutFile '$script' } catch {}; & '$script'";
+  final bytes = <int>[];
+  for (final u in cmd.codeUnits) {
+    bytes.add(u & 0xff);
+    bytes.add(u >> 8);
+  }
+  final enc = base64.encode(bytes);
   await Process.start(
     'powershell.exe',
     [
@@ -59,7 +74,7 @@ Future<String?> _startUpdate() async {
       '-WindowStyle',
       'Hidden',
       '-Command',
-      "Start-Process powershell.exe -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"$script\"'"
+      "Start-Process powershell.exe -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -EncodedCommand $enc'"
     ],
     mode: ProcessStartMode.detached,
   );
