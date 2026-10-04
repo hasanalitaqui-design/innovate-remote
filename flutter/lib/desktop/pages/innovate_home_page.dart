@@ -127,6 +127,37 @@ class _InnovateHomeState extends State<InnovateHome> {
     );
   }
 
+  Future<void> _rename(Peer p) async {
+    final current = p.alias.isNotEmpty
+        ? p.alias
+        : (p.hostname.isNotEmpty ? p.hostname : p.id);
+    final ctl = TextEditingController(text: current);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename this PC'),
+        content: SizedBox(
+          width: 360,
+          child: TextField(
+            controller: ctl,
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'For example: Front desk'),
+            onSubmitted: (v) => Navigator.of(ctx).pop(v),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+          ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(ctl.text),
+              child: const Text('Save')),
+        ],
+      ),
+    );
+    if (name == null) return;
+    await bind.mainSetPeerAlias(id: p.id, alias: name.trim());
+    bind.mainLoadRecentPeers();
+  }
+
   Widget _peerRow(Peer p) {
     final name = p.alias.isNotEmpty
         ? p.alias
@@ -152,6 +183,11 @@ class _InnovateHomeState extends State<InnovateHome> {
               tooltip: 'Transfer files',
               icon: const Icon(Icons.folder_open, size: 20, color: _muted),
               onPressed: () => connect(context, p.id, isFileTransfer: true),
+            ),
+            IconButton(
+              tooltip: 'Rename this PC in my list',
+              icon: const Icon(Icons.edit_outlined, size: 20, color: _muted),
+              onPressed: () => _rename(p),
             ),
             IconButton(
               tooltip: 'Remove from this list',
