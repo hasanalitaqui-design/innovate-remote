@@ -2567,8 +2567,13 @@ class _AboutState extends State<_About> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Innovate Remote - support on our own server.\nPowered by Innovate Technologies.\n\nCopyright © Purslane Tech Pte. Ltd. Licensed under AGPL-3.0.\nSource code: https://github.com/hasanalitaqui-design/innovate-remote',
+                            'Innovate Remote - support on our own server.\nPowered by Innovate Technologies.',
                             style: const TextStyle(color: Colors.white),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'Copyright © Purslane Tech Pte. Ltd. Licensed under AGPL-3.0.\nSource: github.com/hasanalitaqui-design/innovate-remote',
+                            style: const TextStyle(color: Color(0xFFBEE1E1), fontSize: 11, height: 1.4),
                           ),
                         ],
                       ),
