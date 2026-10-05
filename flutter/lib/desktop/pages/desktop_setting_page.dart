@@ -2567,7 +2567,7 @@ class _AboutState extends State<_About> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Innovate Remote - support on our own server.\nPowered by Innovate Technologies.',
+                            'Innovate Remote - private remote access, run by Innovate.\nPowered by Innovate Technologies.',
                             style: const TextStyle(color: Colors.white),
                           ),
                           const SizedBox(height: 14),

@@ -100,7 +100,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600)),
-              Text('Support, on our own server',
+              Text('Private remote access, run by Innovate.',
                   style: TextStyle(color: Color(0xFFBEE1E1), fontSize: 11)),
             ]),
         const Spacer(),

@@ -3,7 +3,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
     [
         ("Your Desktop", "Your ID"),
         ("Control Remote Desktop", "Control a remote PC"),
-        ("Ready", "Ready: connected to the Innovate server"),
+        ("Ready", "Ready: Innovate server"),
         ("One-time Password", "Unattended password"),
         ("empty_recent_tip", "No recent connections yet.
 Type a PC's ID above to connect."),
