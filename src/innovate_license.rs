@@ -9,7 +9,7 @@
 // content or anything about the connections.
 use hbb_common::{config::Config, log};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Once;
+use std::sync::{Arc, Once};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 const VERIFY_URL: &str = "https://license.taquiai.ai/api/remote/verify";
@@ -165,6 +165,80 @@ pub fn report_session(direction: &'static str) {
             Err(e) => log::warn!("session report ({}) not sent: {}", direction, e),
         }
     });
+}
+
+/// Oct 5 2026 (build 25): a session on THIS PC that knows when it ends. `begin_session("in")` reports the start with a session id, sends a heartbeat every minute while it
+/// lasts, and reports the end when the returned guard is dropped (the connection closed). If the PC dies mid-session the heartbeats simply stop and the server uses the last one.
+/// Only this PC's own ID, firm id and the random session id are sent - never who connected or anything on screen. Everything is fire-and-forget on its own threads.
+pub struct SessionGuard {
+    sid: String,
+    stop: Arc<AtomicBool>,
+}
+
+fn session_url(kind: &str, firm: &str, rid: &str, sid: &str, direction: &str) -> String {
+    match kind {
+        "start" => format!(
+            "https://license.taquiai.ai/api/remote/session?firm_id={}&remote_id={}&direction={}&sid={}",
+            firm, rid, direction, sid
+        ),
+        other => format!(
+            "https://license.taquiai.ai/api/remote/session/{}?sid={}&remote_id={}",
+            other, sid, rid
+        ),
+    }
+}
+
+fn session_call(url: String) {
+    let client = crate::hbbs_http::create_http_client_with_url(&url);
+    match client.get(&url).timeout(Duration::from_secs(10)).send() {
+        Ok(r) => log::info!("session call sent: {}", r.status()),
+        Err(e) => log::warn!("session call not sent: {}", e),
+    }
+}
+
+pub fn begin_session(direction: &'static str) -> Option<SessionGuard> {
+    let firm = firm_id();
+    if firm.is_empty() {
+        log::warn!("session report ({}) skipped: no firm id on this PC", direction);
+        return None;
+    }
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let sid = format!("{:x}{:x}", nanos, std::process::id());
+    let sid = sid.chars().filter(|c| c.is_ascii_alphanumeric()).take(40).collect::<String>();
+    let rid = my_id();
+    let stop = Arc::new(AtomicBool::new(false));
+    log::info!("session report ({}) requested, session {}", direction, sid);
+    {
+        let (firm, rid, sid, stop) = (firm.clone(), rid.clone(), sid.clone(), stop.clone());
+        std::thread::spawn(move || {
+            session_call(session_url("start", &firm, &rid, &sid, direction));
+            loop {
+                for _ in 0..60 {
+                    if stop.load(Ordering::Relaxed) {
+                        return;
+                    }
+                    std::thread::sleep(Duration::from_secs(1));
+                }
+                if stop.load(Ordering::Relaxed) {
+                    return;
+                }
+                session_call(session_url("ping", &firm, &rid, &sid, direction));
+            }
+        });
+    }
+    Some(SessionGuard { sid, stop })
+}
+
+impl Drop for SessionGuard {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::Relaxed);
+        let (sid, rid) = (self.sid.clone(), my_id());
+        log::info!("session {} ended", sid);
+        std::thread::spawn(move || session_call(session_url("end", "", &rid, &sid, "in")));
+    }
 }
 
 /// Starts the checker at program start, so the licence is already known when the first connection arrives.

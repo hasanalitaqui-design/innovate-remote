@@ -218,7 +218,8 @@ pub async fn create_tcp_connection(
     if !crate::innovate_license::allowed() {
         bail!(crate::innovate_license::REFUSED);
     }
-    crate::innovate_license::report_session("in");
+    // Oct 5 2026 (build 25): the guard reports the start now, a heartbeat every minute, and the end when this function returns (the connection closed or never got going).
+    let _innovate_session = crate::innovate_license::begin_session("in");
     let mut stream = stream;
     // The address the connection layer keys on, whitelist and admission alike.
     let addr = hbb_common::try_into_v4(addr);
