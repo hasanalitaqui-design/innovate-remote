@@ -602,8 +602,10 @@ class MyIdMenu: Reactor.Component {
             <div>Version: " + handler.get_version() + " \
             <div>Fingerprint: " + handler.get_fingerprint() + " \
             <div .link .custom-event url='https://rustdesk.com/privacy.html'>" + translate("Privacy Statement") + "</div> \
-            <div .link .custom-event url='https://rustdesk.com'>" + translate("Website") + "</div> \
-	    <div style='background: #2c8cff; color: white; padding: 1em; margin-top: 1em;'>Copyright &copy; 2026 Purslane Tech Pte. Ltd.\
+            <div .link .custom-event url='https://github.com/hasanalitaqui-design/innovate-remote'>Source code (AGPL-3.0)</div> \
+            <div>Innovate Remote - support on our own server.</div> \
+            <div>" + translate("powered_by_me") + ".</div> \
+	    <div style='background: #0F6B6B; color: white; padding: 1em; margin-top: 1em;'>Copyright &copy; 2026 Purslane Tech Pte. Ltd.\
             <br />" + handler.get_license() + " \
             <p style='font-weight: bold'>" + translate("Slogan_tip") + "</p>\
             </div>\
@@ -711,10 +713,16 @@ class App: Reactor.Component
     function render() {
         var is_can_screen_recording = handler.is_can_screen_recording(false);
         return
+            <div .innovate-root>
+            <div .innovate-header>
+                <div .innovate-logo />
+                <div .innovate-name>Innovate Remote</div>
+                <div .innovate-tag>Private remote access, run by Innovate.</div>
+            </div>
             <div .app>
                     <div .left-pane style={incoming_only ? "width:*" : ""}>
                     <div>
-                        {is_custom_client && handler.get_builtin_option("hide-powered-by-me") != "Y" ? <div .link #powered-by style="opacity:0.5;font-size:0.8em;text-decoration:underline">{translate('powered_by_me')}</div> : ""}
+                        {is_custom_client && handler.get_builtin_option("hide-powered-by-me") != "Y" ? <div .link #powered-by style="opacity:0.8;font-size:0.8em">{translate('powered_by_me')}</div> : ""}
                         <div .title style="flow:horizontal; position:relative; height:1.6em; line-height:1.6em">
                             <span>{translate('Your Desktop')}</span>
                             {outgoing_only ? <span .link #open-settings style="position:absolute; right:0; bottom:0; transform:scale(0.6); transform-origin:right bottom; opacity:0.85">{svg_menu}</span> : ""}
@@ -753,6 +761,7 @@ class App: Reactor.Component
                     {!outgoing_only ? <ConnectStatus @{this.connect_status} /> : ""}
                 </div>}
                 <div #overlay style="position: absolute;size:*;background:black;opacity:0.5;display:none" />
+            </div>
             </div>; 
     }
 
@@ -1342,10 +1351,6 @@ event change $(#msgbox input[name='confirmation']) {
 
 $(body).content(<div style="size:*"><App /><div #msgbox /></div>);
 
-event click $(#powered-by) {
-    handler.open_url("https://rustdesk.com");
-}
-
 event click $(#open-settings) (_, me) {
     showSettings();
 }
@@ -1521,7 +1526,7 @@ function login() {
     var name0 = getUserName();
     var pass0 = '';
     msgbox("custom-login", translate('Login'), <div .form .set-password> 
-            <div><span>{translate('Username')}:</span><input|text name="username" value={name0} .outline-focus /></div> 
+            <div><span>{translate('Username')}:</span><input|text name="username" value={name0} .outline-focus /></div> \
             <div><span>{translate('Password')}:</span><PasswordComponent value={pass0} /></div> 
         </div>, "", function(res=null, show_progress) {
         if (!res) return;

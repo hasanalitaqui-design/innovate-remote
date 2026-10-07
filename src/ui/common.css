@@ -1,7 +1,7 @@
 html {
-    var(accent): #0071ff;
-    var(button): #2C8CFF;
-    var(gray-bg): #eee;
+    var(accent): #0F6B6B;
+    var(button): #0F6B6B;
+    var(gray-bg): #F1F5F5;
     var(bg): white;
     var(border): #ccc;
     var(hover-border): #999;
@@ -9,7 +9,7 @@ html {
     var(placeholder): #aaa;
     var(lighter-text): #888;
     var(light-text): #666;
-    var(menu-hover): #D7E4F2;
+    var(menu-hover): #DCEBEB;
     var(dark-red): #A72145;
     var(dark-yellow): #FBC732;
     var(dark-blue): #2E2459;
