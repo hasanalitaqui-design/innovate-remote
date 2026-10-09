@@ -331,7 +331,7 @@ class _InnovateHomeState extends State<InnovateHome> {
         final peers = gFFI.recentPeersModel.peers;
         if (peers.isEmpty) return _emptyRecent();
         return LayoutBuilder(builder: (context, box) {
-          final cols = box.maxWidth >= 1100 ? 3 : (box.maxWidth >= 760 ? 2 : 1);      // full-width rows on a normal window, so a name never gets squeezed by the hover buttons
+          final cols = box.maxWidth >= 440 ? 2 : 1;      // two columns (more PCs fit); one only in a very narrow window
           return GridView.builder(
             shrinkWrap: stacked,
             physics: stacked ? const NeverScrollableScrollPhysics() : null,
@@ -430,10 +430,28 @@ class _InnovateHomeState extends State<InnovateHome> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Connect to a PC', style: _headingStyle),
-          const SizedBox(height: 2),
-          const Text('Enter the ID of the PC you want to control.',
-              style: _subStyle),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Connect to a PC', style: _headingStyle),
+                    SizedBox(height: 2),
+                    Text('Enter the ID of the PC you want to control.',
+                        style: _subStyle),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                onPressed: () => _connect(files: true),
+                icon: const Icon(Icons.folder_open_rounded, size: 18, color: _teal),
+                label: const Text('Transfer files'),
+              ),
+            ],
+          ),
           const SizedBox(height: 14),
           Row(
             children: [
@@ -473,16 +491,6 @@ class _InnovateHomeState extends State<InnovateHome> {
                     Icon(Icons.arrow_forward_rounded, size: 20),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => _connect(files: true),
-                icon: const Icon(Icons.folder_open_rounded, size: 18, color: _teal),
-                label: const Text('Transfer files'),
               ),
             ],
           ),
@@ -614,17 +622,6 @@ class _PeerTile extends StatefulWidget {
 class _PeerTileState extends State<_PeerTile> {
   bool _hover = false;
 
-  Widget _action(IconData icon, String tip, VoidCallback onTap) {
-    return IconButton(
-      tooltip: tip,
-      visualDensity: VisualDensity.compact,
-      iconSize: 18,
-      color: _muted,
-      icon: Icon(icon),
-      onPressed: onTap,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final p = widget.peer;
@@ -677,12 +674,27 @@ class _PeerTileState extends State<_PeerTile> {
                   ],
                 ),
               ),
-              if (_hover) ...[
-                _action(Icons.folder_open_rounded, 'Transfer files', widget.onFiles),
-                _action(Icons.edit_outlined, 'Rename this PC in my list', widget.onRename),
-                _action(Icons.close_rounded, 'Remove from this list', widget.onRemove),
-              ] else
-                const Icon(Icons.chevron_right_rounded, size: 22, color: _hint),
+              PopupMenuButton<String>(
+                tooltip: 'More',
+                padding: EdgeInsets.zero,
+                splashRadius: 16,
+                icon: Icon(Icons.more_vert_rounded,
+                    size: 18, color: _hover ? _muted : _hint),
+                onSelected: (v) {
+                  if (v == 'files') {
+                    widget.onFiles();
+                  } else if (v == 'rename') {
+                    widget.onRename();
+                  } else {
+                    widget.onRemove();
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'files', child: Text('Transfer files')),
+                  PopupMenuItem(value: 'rename', child: Text('Rename')),
+                  PopupMenuItem(value: 'remove', child: Text('Remove from list')),
+                ],
+              ),
             ],
           ),
         ),
