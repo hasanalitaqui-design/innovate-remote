@@ -63,13 +63,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return _buildBlock(
         child: Column(children: [
       _innovateHeader(),
-      Expanded(
-          child: isIncomingOnly
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [buildLeftPane(context)],
-                )
-              : const InnovateHome()),
+      Expanded(child: InnovateHome(incomingOnly: isIncomingOnly)),
     ]));
   }
 

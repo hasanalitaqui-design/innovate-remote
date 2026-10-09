@@ -53,7 +53,10 @@ String _firstLetter(String name) {
 }
 
 class InnovateHome extends StatefulWidget {
-  const InnovateHome({Key? key}) : super(key: key);
+  const InnovateHome({Key? key, this.incomingOnly = false}) : super(key: key);
+
+  // Server mode (Oct 9 2026): this PC only accepts connections - no connect box, no recent list.
+  final bool incomingOnly;
 
   @override
   State<InnovateHome> createState() => _InnovateHomeState();
@@ -514,6 +517,40 @@ class _InnovateHomeState extends State<InnovateHome> {
     );
   }
 
+  // Server mode: what this PC is, and what to do with the ID.
+  Widget _serverNote(BuildContext context) {
+    return _card(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+                color: _tealSoft, borderRadius: BorderRadius.circular(10)),
+            child: const Icon(Icons.shield_outlined, size: 20, color: _teal),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('This PC accepts connections only',
+                    style: TextStyle(
+                        fontSize: 15, color: _ink, fontWeight: FontWeight.w600)),
+                SizedBox(height: 4),
+                Text(
+                    'Give the ID above and the unattended password to the person who needs to work on this PC. This PC cannot start connections to other PCs.',
+                    style: TextStyle(fontSize: 14, color: _muted, height: 1.45)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _footer() {
     return Container(
       height: 40,
@@ -549,7 +586,24 @@ class _InnovateHomeState extends State<InnovateHome> {
           children: [
             const InnovateUpdateBanner(),
             Expanded(
-              child: LayoutBuilder(builder: (context, box) {
+              child: widget.incomingOnly
+                  ? Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 520),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _leftCard(context),
+                              const SizedBox(height: 16),
+                              _serverNote(context),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  : LayoutBuilder(builder: (context, box) {
                 // narrow window: one column that scrolls; wide window: ID and help on the left, connect and recent on the right
                 if (box.maxWidth < 760) {
                   return SingleChildScrollView(
