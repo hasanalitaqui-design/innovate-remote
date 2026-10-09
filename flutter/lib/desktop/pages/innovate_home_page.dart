@@ -331,17 +331,17 @@ class _InnovateHomeState extends State<InnovateHome> {
         final peers = gFFI.recentPeersModel.peers;
         if (peers.isEmpty) return _emptyRecent();
         return LayoutBuilder(builder: (context, box) {
-          final cols = box.maxWidth >= 1000 ? 3 : (box.maxWidth >= 600 ? 2 : 1);
+          final cols = box.maxWidth >= 1100 ? 3 : (box.maxWidth >= 760 ? 2 : 1);      // full-width rows on a normal window, so a name never gets squeezed by the hover buttons
           return GridView.builder(
             shrinkWrap: stacked,
             physics: stacked ? const NeverScrollableScrollPhysics() : null,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
             itemCount: peers.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: cols,
-              mainAxisExtent: 72,
+              mainAxisExtent: 64,
               crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              mainAxisSpacing: 8,
             ),
             itemBuilder: (_, i) => _peerRow(peers[i]),
           );
