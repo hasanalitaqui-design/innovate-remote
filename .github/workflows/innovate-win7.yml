@@ -11,6 +11,11 @@ on:
 permissions:
   contents: write
 
+# Oct 9 2026: runs wait for each other (they all replace the same 'innovate-win7' release file); a run that is still waiting is replaced by a newer one.
+concurrency:
+  group: innovate-remote-win7-release
+  cancel-in-progress: false
+
 env:
   LLVM_VERSION: "15.0.6"
   TAG_NAME: "innovate-win7"

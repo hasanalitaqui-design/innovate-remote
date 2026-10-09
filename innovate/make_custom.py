@@ -34,10 +34,22 @@ settings = {
     "default-settings": {                                          # changeable per PC
         "allow-auto-disconnect": "Y",
         "auto-disconnect-timeout": "15",                           # minutes idle -> session closes
+        # Oct 9 2026: sharper picture (RustDesk default is "balanced" = soft text). The loader maps keys with "_" -> "-", so they MUST be written with dashes
+        # (the first version used "image_quality" and was silently ignored; only custom-fps took effect).
+        "image-quality": "custom",
+        "custom-image-quality": "85",
+        "custom-fps": "30",
     },
 }
 raw = json.dumps(settings, separators=(",", ":")).encode()
 signed = bytes(sk.sign(raw))                                       # signature + message: the format sodiumoxide's sign::verify reads
 open(FORK + "/innovate/innovate_custom.txt", "w").write(base64.b64encode(signed).decode())
+# Oct 9 2026: SERVER variant - the same settings plus conn-type=incoming (this PC only accepts connections; the program refuses to start one).
+# It is placed as custom.txt next to the program by the install script (-Server); no second build is needed.
+settings_srv = dict(settings); settings_srv["conn-type"] = "incoming"
+raw_s = json.dumps(settings_srv, separators=(",", ":")).encode()
+signed_s = bytes(sk.sign(raw_s))
+open(FORK + "/innovate/innovate_custom_server.txt", "w").write(base64.b64encode(signed_s).decode())
+open(BASE + "/release/custom_server.txt", "w").write(base64.b64encode(signed_s).decode())
 print("verify key (public):", pub_b64)
 print("settings text written:", len(signed), "bytes")
