@@ -8,6 +8,12 @@ on:
 permissions:
   contents: write
 
+# Oct 9 2026: runs of this workflow wait for each other (two overlapping builds both replace the same 'innovate-latest' release file - whichever finished last won).
+# A run that is still waiting is replaced by a newer one; the one that is building is never cancelled.
+concurrency:
+  group: innovate-remote-x64-release
+  cancel-in-progress: false
+
 # NOTE: F-Droid builder script 'flutter/build_fdroid.sh' reads environment
 # variables from this workflow!
 #
