@@ -73,24 +73,35 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     ]));
   }
 
-  // Innovate Remote header bar (Innovate teal, logo, name)
+  // Innovate Remote header bar (Innovate teal, logo, name) - restyled Oct 9 2026
   Widget _innovateHeader() {
     return Container(
-      height: 66,
+      height: 72,
       width: double.infinity,
-      color: const Color(0xFF0F6B6B),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [Color(0xFF0F6B6B), Color(0xFF0B5858)],
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(children: [
         Container(
-          width: 46,
-          height: 46,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(10)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                    color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2))
+              ]),
           child: Padding(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(6),
               child: Image.asset('assets/innovate_icon.png')),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 16),
         const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,17 +109,27 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               Text('Innovate Remote',
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600)),
+                      fontSize: 19,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.3)),
+              SizedBox(height: 2),
               Text('Private remote access, run by Innovate.',
-                  style: TextStyle(color: Color(0xFFBEE1E1), fontSize: 11)),
+                  style: TextStyle(color: Color(0xFFBFE3E3), fontSize: 12)),
             ]),
         const Spacer(),
         TextButton.icon(
+          style: TextButton.styleFrom(
+            backgroundColor: const Color(0x1FFFFFFF),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
           onPressed: () => DesktopSettingPage.switch2page(SettingsTabKey.general),
-          icon: const Icon(Icons.settings, color: Colors.white, size: 18),
+          icon: const Icon(Icons.settings_outlined, color: Colors.white, size: 18),
           label: const Text('Settings',
-              style: TextStyle(color: Colors.white, fontSize: 14)),
+              style: TextStyle(
+                  color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
         ),
       ]),
     );
