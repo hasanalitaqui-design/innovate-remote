@@ -376,6 +376,15 @@ class MyTheme {
     brightness: Brightness.light,
     hoverColor: Color.fromARGB(255, 224, 224, 224),
     scaffoldBackgroundColor: Colors.white,
+    // Oct 9 2026: Innovate look for every screen - rounded white cards, teal accent, quiet borders
+    cardTheme: CardTheme(
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Color(0xFFE1E9E9)),
+      ),
+    ),
     dialogBackgroundColor: Colors.white,
     appBarTheme: AppBarTheme(
       shadowColor: Colors.transparent,
@@ -393,18 +402,19 @@ class MyTheme {
     scrollbarTheme: scrollbarTheme,
     inputDecorationTheme: isDesktop
         ? InputDecorationTheme(
-            fillColor: grayBg,
+            fillColor: Colors.white,
             filled: true,
             isDense: true,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Color(0xFFC9D8D8), width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: MyTheme.accent, width: 1.5),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Color(0xFFC9D8D8), width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(color: MyTheme.accent, width: 2),
             ),
           )
@@ -430,8 +440,9 @@ class MyTheme {
         ? TextButtonThemeData(
             style: TextButton.styleFrom(
               splashFactory: NoSplash.splashFactory,
+              foregroundColor: MyTheme.accent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
+                borderRadius: BorderRadius.circular(10.0),
               ),
             ),
           )
@@ -439,17 +450,19 @@ class MyTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: MyTheme.accent,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        backgroundColor: grayBg,
+        backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
+        side: BorderSide(color: Color(0xFFC9D8D8), width: 1.5),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
     ),
@@ -461,7 +474,7 @@ class MyTheme {
         style:
             MenuStyle(backgroundColor: MaterialStatePropertyAll(Colors.white))),
     colorScheme: ColorScheme.light(
-        primary: accent, secondary: accent, background: grayBg),
+        primary: accent, secondary: accent, background: Color(0xFFF3F6F6)),
     popupMenuTheme: PopupMenuThemeData(
         color: Colors.white,
         shape: RoundedRectangleBorder(
@@ -482,8 +495,16 @@ class MyTheme {
     fontFamily: 'Inter',                      // Oct 9 2026: Innovate look - Inter (SIL Open Font License) everywhere
     brightness: Brightness.dark,
     hoverColor: Color.fromARGB(255, 45, 46, 53),
-    scaffoldBackgroundColor: Color(0xFF18191E),
-    dialogBackgroundColor: Color(0xFF18191E),
+    scaffoldBackgroundColor: Color(0xFF0E1717),
+    dialogBackgroundColor: Color(0xFF152122),
+    cardTheme: CardTheme(
+      color: Color(0xFF152122),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Color(0xFF263838)),
+      ),
+    ),
     appBarTheme: AppBarTheme(
       shadowColor: Colors.transparent,
     ),
@@ -493,26 +514,27 @@ class MyTheme {
         borderRadius: BorderRadius.circular(18.0),
         side: BorderSide(
           width: 1,
-          color: Color(0xFF24252B),
+          color: Color(0xFF263838),
         ),
       ),
     ),
     scrollbarTheme: scrollbarThemeDark,
     inputDecorationTheme: (isDesktop || isWebDesktop)
         ? InputDecorationTheme(
-            fillColor: Color(0xFF24252B),
+            fillColor: Color(0xFF1B2B2C),
             filled: true,
             isDense: true,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Color(0xFF35504F), width: 1.5),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: MyTheme.accent, width: 1.5),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Color(0xFF35504F), width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: MyTheme.accent, width: 2),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Color(0xFF5BC8C4), width: 2),
             ),
           )
         : null,
@@ -527,7 +549,7 @@ class MyTheme {
         color: accent80,
       ),
     ),
-    cardColor: Color(0xFF24252B),
+    cardColor: Color(0xFF152122),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     tabBarTheme: const TabBarTheme(
       labelColor: Colors.white70,
@@ -541,9 +563,9 @@ class MyTheme {
             style: TextButton.styleFrom(
               splashFactory: NoSplash.splashFactory,
               disabledForegroundColor: Colors.white70,
-              foregroundColor: Colors.white70,
+              foregroundColor: Color(0xFF5BC8C4),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
+                borderRadius: BorderRadius.circular(10.0),
               ),
             ),
           )
@@ -554,19 +576,20 @@ class MyTheme {
         foregroundColor: Colors.white,
         disabledForegroundColor: Colors.white70,
         disabledBackgroundColor: Colors.white10,
+        elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Color(0xFF24252B),
-        side: BorderSide(color: Colors.white12, width: 0.5),
+        backgroundColor: Color(0xFF152122),
+        side: BorderSide(color: Color(0xFF35504F), width: 1.5),
         disabledForegroundColor: Colors.white70,
         foregroundColor: Colors.white70,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
     ),
@@ -580,7 +603,7 @@ class MyTheme {
     colorScheme: ColorScheme.dark(
       primary: accent,
       secondary: accent,
-      background: Color(0xFF24252B),
+      background: Color(0xFF0E1717),
     ),
     popupMenuTheme: PopupMenuThemeData(
         shape: RoundedRectangleBorder(

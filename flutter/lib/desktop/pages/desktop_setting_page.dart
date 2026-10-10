@@ -287,7 +287,7 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
           const VerticalDivider(width: 1),
           Expanded(
             child: Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
+              color: Theme.of(context).colorScheme.background,
               child: PageView(
                 controller: controller,
                 physics: NeverScrollableScrollPhysics(),
@@ -305,9 +305,9 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
       translate('Settings'),
       textAlign: TextAlign.left,
       style: const TextStyle(
-        color: _accentColor,
         fontSize: _kTitleFontSize,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.3,
       ),
     );
     return Row(
@@ -350,39 +350,46 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
   Widget _listItem({required _TabInfo tab}) {
     return Obx(() {
       bool selected = tab.key == selectedTab.value;
-      return SizedBox(
-        width: _kTabWidth,
-        height: _kTabHeight,
-        child: InkWell(
-          onTap: () {
-            if (selectedTab.value != tab.key) {
-              int index = DesktopSettingPage.tabKeys.indexOf(tab.key);
-              if (index == -1) {
-                return;
+      final dark = Theme.of(context).brightness == Brightness.dark;
+      final accent = dark ? const Color(0xFF5BC8C4) : _accentColor;
+      final pill = dark ? const Color(0xFF16403F) : const Color(0xFFE4F1F1);
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        child: SizedBox(
+          height: _kTabHeight,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () {
+              if (selectedTab.value != tab.key) {
+                int index = DesktopSettingPage.tabKeys.indexOf(tab.key);
+                if (index == -1) {
+                  return;
+                }
+                controller.jumpToPage(index);
               }
-              controller.jumpToPage(index);
-            }
-            selectedTab.value = tab.key;
-          },
-          child: Row(children: [
-            Container(
-              width: 4,
-              height: _kTabHeight * 0.7,
-              color: selected ? _accentColor : null,
+              selectedTab.value = tab.key;
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: selected ? pill : null,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(children: [
+                Icon(
+                  selected ? tab.selected : tab.unselected,
+                  color: selected ? accent : null,
+                  size: 20,
+                ).marginOnly(left: 12, right: 10),
+                Text(
+                  translate(tab.label),
+                  style: TextStyle(
+                      color: selected ? accent : null,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                      fontSize: _kContentFontSize),
+                ),
+              ]),
             ),
-            Icon(
-              selected ? tab.selected : tab.unselected,
-              color: selected ? _accentColor : null,
-              size: 20,
-            ).marginOnly(left: 13, right: 10),
-            Text(
-              translate(tab.label),
-              style: TextStyle(
-                  color: selected ? _accentColor : null,
-                  fontWeight: FontWeight.w400,
-                  fontSize: _kContentFontSize),
-            ),
-          ]),
+          ),
         ),
       );
     });
@@ -2614,7 +2621,9 @@ Widget _Card(
                       translate(title),
                       textAlign: TextAlign.start,
                       style: const TextStyle(
-                        fontSize: _kTitleFontSize,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
                       ),
                     )),
                     ...?title_suffix

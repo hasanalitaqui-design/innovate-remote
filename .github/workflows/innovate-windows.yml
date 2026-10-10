@@ -341,6 +341,31 @@ jobs:
         run: |
           BASE_URL=${{ env.SIGN_BASE_URL }} SECRET_KEY=${{ secrets.SIGN_SECRET_KEY }} python3 res/job.py sign_files ./SignOutput
 
+      # Oct 9 2026: a real picture of the built app (never blocks the release). Start it, wait, photograph the screen, stop it.
+      - name: Screenshot of the built app
+        if: env.UPLOAD_ARTIFACT == 'true'
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $exe = Join-Path (Get-Location) "rustdesk\InnovateRemote.exe"
+          $p = Start-Process -FilePath $exe -PassThru
+          Start-Sleep -Seconds 25
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          $b = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.CopyFromScreen($b.Left, $b.Top, 0, 0, $bmp.Size)
+          $bmp.Save((Join-Path (Get-Location) "app-screenshot.png"))
+          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+
+      - name: Upload screenshot
+        if: env.UPLOAD_ARTIFACT == 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: app-screenshot-build-${{ github.run_number }}
+          path: app-screenshot.png
+
       - name: Publish Release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         if: env.UPLOAD_ARTIFACT == 'true'

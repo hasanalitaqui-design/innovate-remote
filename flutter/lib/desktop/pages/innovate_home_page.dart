@@ -13,29 +13,28 @@ import 'package:flutter_hbb/desktop/pages/innovate_updates.dart';
 import 'package:flutter_hbb/models/peer_model.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 
-const _teal = Color(0xFF0F6B6B);
-const _tealDark = Color(0xFF0B5656);
-const _tealSoft = Color(0xFFE4F1F1);
-const _bg = Color(0xFFF3F6F6);
-const _line = Color(0xFFE1E9E9);
-const _fieldLine = Color(0xFFC9D8D8);
-const _ink = Color(0xFF0E2323);
-const _muted = Color(0xFF5F7676);
-const _hint = Color(0xFF93A6A6);
+// Palette. Light is the Innovate look; dark keeps the same teal on deep blue-green surfaces. _dark is refreshed at the top of every build.
+bool _dark = false;
+Color get _teal => Color(0xFF0F6B6B);
+Color get _tealDark => Color(0xFF0B5656);
+Color get _tealText => _dark ? Color(0xFF5BC8C4) : Color(0xFF0F6B6B);
+Color get _tealSoft => _dark ? Color(0xFF16403F) : Color(0xFFE4F1F1);
+Color get _bg => _dark ? Color(0xFF0E1717) : Color(0xFFF3F6F6);
+Color get _surface => _dark ? Color(0xFF152122) : Colors.white;
+Color get _surfaceSoft => _dark ? Color(0xFF1B2B2C) : Color(0xFFF3F8F8);
+Color get _tileHover => _dark ? Color(0xFF1B2D2E) : Color(0xFFF2F9F9);
+Color get _line => _dark ? Color(0xFF263838) : Color(0xFFE1E9E9);
+Color get _fieldLine => _dark ? Color(0xFF35504F) : Color(0xFFC9D8D8);
+Color get _ink => _dark ? Color(0xFFE8F1F1) : Color(0xFF0E2323);
+Color get _muted => _dark ? Color(0xFF9DB3B3) : Color(0xFF5F7676);
+Color get _hint => _dark ? Color(0xFF6F8888) : Color(0xFF93A6A6);
+Color get _shadow => _dark ? Color(0x33000000) : Color(0x0D0E2323);
 
 const List<FontFeature> _tnum = [FontFeature.tabularFigures()];
 
-const _labelStyle = TextStyle(
-    fontSize: 12,
-    color: _muted,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.8);
-const _headingStyle = TextStyle(
-    fontSize: 18,
-    color: _ink,
-    fontWeight: FontWeight.w700,
-    letterSpacing: -0.2);
-const _subStyle = TextStyle(fontSize: 14, color: _muted, height: 1.4);
+TextStyle get _labelStyle => TextStyle(fontSize: 12, color: _muted, fontWeight: FontWeight.w600, letterSpacing: 0.8);
+TextStyle get _headingStyle => TextStyle(fontSize: 18, color: _ink, fontWeight: FontWeight.w700, letterSpacing: -0.2);
+TextStyle get _subStyle => TextStyle(fontSize: 14, color: _muted, height: 1.4);
 
 String _fmtId(String id) {
   // groups of three counted from the right, so every length reads the same way: 36 730 855 / 373 465 605 / 1 428 125 705
@@ -53,7 +52,7 @@ String _firstLetter(String name) {
 }
 
 class InnovateHome extends StatefulWidget {
-  const InnovateHome({Key? key, this.incomingOnly = false}) : super(key: key);
+  InnovateHome({Key? key, this.incomingOnly = false}) : super(key: key);
 
   // Server mode (Oct 9 2026): this PC only accepts connections - no connect box, no recent list.
   final bool incomingOnly;
@@ -91,7 +90,7 @@ class _InnovateHomeState extends State<InnovateHome> {
         ClipboardData(text: gFFI.serverModel.serverId.text.replaceAll(' ', '')));
     if (!mounted) return;
     setState(() => _copied = true);
-    await Future.delayed(const Duration(milliseconds: 1600));
+    await Future.delayed(Duration(milliseconds: 1600));
     if (mounted) setState(() => _copied = false);
   }
 
@@ -103,18 +102,18 @@ class _InnovateHomeState extends State<InnovateHome> {
       dividerColor: _line,
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: _teal,
-          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          foregroundColor: _tealText,
+          textStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
           elevation: MaterialStateProperty.all(0),
-          minimumSize: MaterialStateProperty.all(const Size(0, 48)),
+          minimumSize: MaterialStateProperty.all(Size(0, 48)),
           padding: MaterialStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 20)),
+              EdgeInsets.symmetric(horizontal: 20)),
           shape: MaterialStateProperty.all(
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
           backgroundColor: MaterialStateProperty.resolveWith((states) =>
@@ -124,42 +123,42 @@ class _InnovateHomeState extends State<InnovateHome> {
                   : _teal),
           foregroundColor: MaterialStateProperty.all(Colors.white),
           textStyle: MaterialStateProperty.all(
-              const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: ButtonStyle(
           elevation: MaterialStateProperty.all(0),
-          minimumSize: MaterialStateProperty.all(const Size(0, 38)),
+          minimumSize: MaterialStateProperty.all(Size(0, 38)),
           padding: MaterialStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 16)),
+              EdgeInsets.symmetric(horizontal: 16)),
           shape: MaterialStateProperty.all(
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
           backgroundColor: MaterialStateProperty.resolveWith((states) =>
-              states.contains(MaterialState.hovered) ? _tealSoft : Colors.white),
+              states.contains(MaterialState.hovered) ? _tealSoft : _surface),
           foregroundColor: MaterialStateProperty.all(_ink),
           side: MaterialStateProperty.resolveWith((states) => BorderSide(
               color: states.contains(MaterialState.hovered) ? _teal : _fieldLine,
               width: 1.5)),
           textStyle: MaterialStateProperty.all(
-              const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: _surface,
         isDense: false,
-        hintStyle: const TextStyle(color: _hint, fontWeight: FontWeight.w400),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        hintStyle: TextStyle(color: _hint, fontWeight: FontWeight.w400),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: _fieldLine, width: 1.5)),
+            borderSide: BorderSide(color: _fieldLine, width: 1.5)),
         enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: _fieldLine, width: 1.5)),
+            borderSide: BorderSide(color: _fieldLine, width: 1.5)),
         focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: _teal, width: 2)),
+            borderSide: BorderSide(color: _tealText, width: 2)),
       ),
     );
   }
@@ -167,13 +166,13 @@ class _InnovateHomeState extends State<InnovateHome> {
   Widget _card({required Widget child, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(20),
+      padding: padding ?? EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: _line),
-        boxShadow: const [
-          BoxShadow(color: Color(0x0D0E2323), blurRadius: 16, offset: Offset(0, 4)),
+        boxShadow: [
+          BoxShadow(color: _shadow, blurRadius: 16, offset: Offset(0, 4)),
         ],
       ),
       child: child,
@@ -186,8 +185,8 @@ class _InnovateHomeState extends State<InnovateHome> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('YOUR ID', style: _labelStyle),
-          const SizedBox(height: 4),
+          Text('YOUR ID', style: _labelStyle),
+          SizedBox(height: 4),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -196,7 +195,7 @@ class _InnovateHomeState extends State<InnovateHome> {
                   valueListenable: gFFI.serverModel.serverId,
                   builder: (context, v, _) => SelectableText(
                     v.text,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 28,
                         height: 1.15,
                         fontWeight: FontWeight.w700,
@@ -206,7 +205,7 @@ class _InnovateHomeState extends State<InnovateHome> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Tooltip(
                 message: _copied ? 'Copied' : 'Copy my ID',
                 child: InkWell(
@@ -218,36 +217,36 @@ class _InnovateHomeState extends State<InnovateHome> {
                     decoration: BoxDecoration(
                         color: _tealSoft, borderRadius: BorderRadius.circular(9)),
                     child: Icon(_copied ? Icons.check_rounded : Icons.copy_rounded,
-                        size: 18, color: _teal),
+                        size: 18, color: _tealText),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          const Divider(height: 1, color: _line),
-          const SizedBox(height: 12),
-          const Text('UNATTENDED PASSWORD', style: _labelStyle),
-          const SizedBox(height: 4),
+          SizedBox(height: 14),
+          Divider(height: 1, color: _line),
+          SizedBox(height: 12),
+          Text('UNATTENDED PASSWORD', style: _labelStyle),
+          SizedBox(height: 4),
           Row(
             children: [
-              const Text('••••••••••',
+              Text('••••••••••',
                   style: TextStyle(fontSize: 16, color: _ink, letterSpacing: 2)),
-              const Spacer(),
+              Spacer(),
               TextButton(
                 onPressed: () =>
                     DesktopSettingPage.switch2page(SettingsTabKey.safety),
-                child: const Text('Change'),
+                child: Text('Change'),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-                color: const Color(0xFFF3F8F8),
+                color: _surfaceSoft,
                 borderRadius: BorderRadius.circular(10)),
-            child: const Row(children: [Expanded(child: OnlineStatusWidget())]),
+            child: Row(children: [Expanded(child: OnlineStatusWidget())]),
           ),
         ],
       ),
@@ -262,21 +261,21 @@ class _InnovateHomeState extends State<InnovateHome> {
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rename this PC'),
+        title: Text('Rename this PC'),
         content: SizedBox(
           width: 360,
           child: TextField(
             controller: ctl,
             autofocus: true,
-            decoration: const InputDecoration(hintText: 'For example: Front desk'),
+            decoration: InputDecoration(hintText: 'For example: Front desk'),
             onSubmitted: (v) => Navigator.of(ctx).pop(v),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text('Cancel')),
           ElevatedButton(
               onPressed: () => Navigator.of(ctx).pop(ctl.text),
-              child: const Text('Save')),
+              child: Text('Save')),
         ],
       ),
     );
@@ -300,7 +299,7 @@ class _InnovateHomeState extends State<InnovateHome> {
 
   Widget _emptyRecent() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+      padding: EdgeInsets.symmetric(vertical: 40, horizontal: 24),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -309,15 +308,15 @@ class _InnovateHomeState extends State<InnovateHome> {
               width: 56,
               height: 56,
               decoration:
-                  const BoxDecoration(color: _tealSoft, shape: BoxShape.circle),
-              child: const Icon(Icons.history_rounded, size: 28, color: _teal),
+                  BoxDecoration(color: _tealSoft, shape: BoxShape.circle),
+              child: Icon(Icons.history_rounded, size: 28, color: _tealText),
             ),
-            const SizedBox(height: 16),
-            const Text('No recent connections',
+            SizedBox(height: 16),
+            Text('No recent connections',
                 style: TextStyle(
                     fontSize: 16, color: _ink, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 4),
-            const Text("PCs you connect to will show up here.",
+            SizedBox(height: 4),
+            Text("PCs you connect to will show up here.",
                 textAlign: TextAlign.center, style: _subStyle),
           ],
         ),
@@ -337,8 +336,8 @@ class _InnovateHomeState extends State<InnovateHome> {
           final cols = box.maxWidth >= 440 ? 2 : 1;      // two columns (more PCs fit); one only in a very narrow window
           return GridView.builder(
             shrinkWrap: stacked,
-            physics: stacked ? const NeverScrollableScrollPhysics() : null,
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+            physics: stacked ? NeverScrollableScrollPhysics() : null,
+            padding: EdgeInsets.fromLTRB(12, 10, 12, 10),
             itemCount: peers.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: cols,
@@ -358,24 +357,24 @@ class _InnovateHomeState extends State<InnovateHome> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
+            padding: EdgeInsets.fromLTRB(20, 14, 20, 12),
             child: Row(
               children: [
-                const Text('Recent', style: _headingStyle),
-                const SizedBox(width: 10),
+                Text('Recent', style: _headingStyle),
+                SizedBox(width: 10),
                 AnimatedBuilder(
                   animation: gFFI.recentPeersModel,
                   builder: (context, _) {
                     final n = gFFI.recentPeersModel.peers.length;
-                    if (n == 0) return const SizedBox.shrink();
+                    if (n == 0) return SizedBox.shrink();
                     return Container(
                       padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                           color: _tealSoft,
                           borderRadius: BorderRadius.circular(20)),
                       child: Text('$n',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 12,
                               color: _teal,
                               fontWeight: FontWeight.w700)),
@@ -385,7 +384,7 @@ class _InnovateHomeState extends State<InnovateHome> {
               ],
             ),
           ),
-          const Divider(height: 1, color: _line),
+          Divider(height: 1, color: _line),
           if (stacked) grid else Expanded(child: grid),
         ],
       ),
@@ -395,31 +394,31 @@ class _InnovateHomeState extends State<InnovateHome> {
   // Short and quiet: three steps under the ID card.
   Widget _helpCard(BuildContext context) {
     Widget step(String n, String t) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
+          padding: EdgeInsets.only(bottom: 10),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Container(
               width: 22,
               height: 22,
               alignment: Alignment.center,
               decoration:
-                  const BoxDecoration(color: _tealSoft, shape: BoxShape.circle),
+                  BoxDecoration(color: _tealSoft, shape: BoxShape.circle),
               child: Text(n,
-                  style: const TextStyle(
-                      color: _teal, fontSize: 12, fontWeight: FontWeight.w700)),
+                  style: TextStyle(
+                      color: _tealText, fontSize: 12, fontWeight: FontWeight.w700)),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
                 child: Text(t,
-                    style: const TextStyle(fontSize: 14, color: _ink, height: 1.4))),
+                    style: TextStyle(fontSize: 14, color: _ink, height: 1.4))),
           ]),
         );
     return _card(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+      padding: EdgeInsets.fromLTRB(24, 20, 24, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('How to connect', style: _headingStyle),
-          const SizedBox(height: 16),
+          Text('How to connect', style: _headingStyle),
+          SizedBox(height: 16),
           step('1', "Type the other PC's ID and press Connect."),
           step('2', 'Enter its password, or let it accept the request.'),
           step('3', 'Work on it as if you were sitting there.'),
@@ -436,7 +435,7 @@ class _InnovateHomeState extends State<InnovateHome> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -447,15 +446,15 @@ class _InnovateHomeState extends State<InnovateHome> {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               OutlinedButton.icon(
                 onPressed: () => _connect(files: true),
-                icon: const Icon(Icons.folder_open_rounded, size: 18, color: _teal),
-                label: const Text('Transfer files'),
+                icon: Icon(Icons.folder_open_rounded, size: 18, color: _tealText),
+                label: Text('Transfer files'),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -466,13 +465,13 @@ class _InnovateHomeState extends State<InnovateHome> {
                   enableSuggestions: false,
                   keyboardType: TextInputType.visiblePassword,
                   inputFormatters: [IDTextInputFormatter()],
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 18,
                       height: 1.2,
                       fontWeight: FontWeight.w500,
                       color: _ink,
                       fontFeatures: _tnum),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Remote ID',
                     isDense: true,
                     contentPadding:
@@ -483,10 +482,10 @@ class _InnovateHomeState extends State<InnovateHome> {
                   onSubmitted: (_) => _connect(),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               ElevatedButton(
                 onPressed: _connect,
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text('Connect'),
@@ -508,7 +507,7 @@ class _InnovateHomeState extends State<InnovateHome> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _connectCard(context),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         if (stacked)
           _recentCard(context, stacked: true)
         else
@@ -520,7 +519,7 @@ class _InnovateHomeState extends State<InnovateHome> {
   // Server mode: what this PC is, and what to do with the ID.
   Widget _serverNote(BuildContext context) {
     return _card(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+      padding: EdgeInsets.fromLTRB(20, 18, 20, 18),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -529,10 +528,10 @@ class _InnovateHomeState extends State<InnovateHome> {
             height: 36,
             decoration: BoxDecoration(
                 color: _tealSoft, borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.shield_outlined, size: 20, color: _teal),
+            child: Icon(Icons.shield_outlined, size: 20, color: _tealText),
           ),
-          const SizedBox(width: 14),
-          const Expanded(
+          SizedBox(width: 14),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -554,14 +553,14 @@ class _InnovateHomeState extends State<InnovateHome> {
   Widget _footer() {
     return Container(
       height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      padding: EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: _surface,
         border: Border(top: BorderSide(color: _line)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.lock_outline_rounded, size: 16, color: _teal),
+          Icon(Icons.lock_outline_rounded, size: 16, color: _tealText),
           SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -578,25 +577,26 @@ class _InnovateHomeState extends State<InnovateHome> {
 
   @override
   Widget build(BuildContext context) {
+    _dark = Theme.of(context).brightness == Brightness.dark;
     return Theme(
       data: _theme(context),
       child: Material(
         color: _bg,
         child: Column(
           children: [
-            const InnovateUpdateBanner(),
+            InnovateUpdateBanner(),
             Expanded(
               child: widget.incomingOnly
                   ? Center(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(24),
+                        padding: EdgeInsets.all(24),
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 520),
+                          constraints: BoxConstraints(maxWidth: 520),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               _leftCard(context),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               _serverNote(context),
                             ],
                           ),
@@ -607,21 +607,21 @@ class _InnovateHomeState extends State<InnovateHome> {
                 // narrow window: one column that scrolls; wide window: ID and help on the left, connect and recent on the right
                 if (box.maxWidth < 760) {
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _leftCard(context),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         _rightColumn(context, stacked: true),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         _helpCard(context),
                       ],
                     ),
                   );
                 }
                 return Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(20),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -631,13 +631,13 @@ class _InnovateHomeState extends State<InnovateHome> {
                           child: Column(
                             children: [
                               _leftCard(context),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               _helpCard(context),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      SizedBox(width: 20),
                       Expanded(child: _rightColumn(context)),
                     ],
                   ),
@@ -654,7 +654,7 @@ class _InnovateHomeState extends State<InnovateHome> {
 
 // One recent PC: initial in a soft circle, name with the ID under it; the small actions appear when the mouse is over the tile.
 class _PeerTile extends StatefulWidget {
-  const _PeerTile({
+  _PeerTile({
     Key? key,
     required this.peer,
     required this.onOpen,
@@ -690,12 +690,12 @@ class _PeerTileState extends State<_PeerTile> {
         behavior: HitTestBehavior.opaque,
         onTap: widget.onOpen,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          padding: const EdgeInsets.only(left: 10, right: 4),
+          duration: Duration(milliseconds: 120),
+          padding: EdgeInsets.only(left: 10, right: 4),
           decoration: BoxDecoration(
-            color: _hover ? const Color(0xFFF2F9F9) : Colors.white,
+            color: _hover ? _tileHover : _surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _hover ? const Color(0x800F6B6B) : _line),
+            border: Border.all(color: _hover ? Color(0x800F6B6B) : _line),
           ),
           child: Row(
             children: [
@@ -704,12 +704,12 @@ class _PeerTileState extends State<_PeerTile> {
                 height: 32,
                 alignment: Alignment.center,
                 decoration:
-                    const BoxDecoration(color: _tealSoft, shape: BoxShape.circle),
+                    BoxDecoration(color: _tealSoft, shape: BoxShape.circle),
                 child: Text(_firstLetter(name),
-                    style: const TextStyle(
-                        fontSize: 14, color: _teal, fontWeight: FontWeight.w700)),
+                    style: TextStyle(
+                        fontSize: 14, color: _tealText, fontWeight: FontWeight.w700)),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -718,12 +718,12 @@ class _PeerTileState extends State<_PeerTile> {
                     Text(name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 14, color: _ink, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 0),
+                    SizedBox(height: 0),
                     Text(_fmtId(p.id),
                         maxLines: 1,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 12, color: _muted, fontFeatures: _tnum)),
                   ],
                 ),
@@ -743,7 +743,7 @@ class _PeerTileState extends State<_PeerTile> {
                     widget.onRemove();
                   }
                 },
-                itemBuilder: (_) => const [
+                itemBuilder: (_) => [
                   PopupMenuItem(value: 'files', child: Text('Transfer files')),
                   PopupMenuItem(value: 'rename', child: Text('Rename')),
                   PopupMenuItem(value: 'remove', child: Text('Remove from list')),
