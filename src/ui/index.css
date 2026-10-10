@@ -497,3 +497,47 @@ textarea.grey-text {
     text-decoration: none;
     color: #5C7272;
 }
+
+
+/* Oct 9 2026: same look as the Windows 10 build - taller header with a soft gradient, roomier panels, quieter lines (CSS only; Sciter ignores what it does not know) */
+.innovate-header {
+    height: 56px;
+    background: linear-gradient(to right, #0F6B6B, #0B5858);
+    padding: 0 24px;
+    border-bottom: none;
+}
+
+.innovate-header .innovate-logo {
+    width: 34px;
+    height: 34px;
+    margin: 11px 14px 11px 0;
+}
+
+.innovate-header .innovate-name {
+    font-size: 1.3em;
+    font-weight: 600;
+    line-height: 56px;
+}
+
+.innovate-header .innovate-tag {
+    line-height: 56px;
+    color: #BFE3E3;
+}
+
+.innovate-root > .app,
+.left-pane {
+    background: #F3F6F6;
+}
+
+.left-pane {
+    border-right: #E1E9E9 1px solid;
+}
+
+.left-pane > div:nth-child(1) {
+    padding: 24px;
+    padding-bottom: 64px;
+}
+
+.right-pane {
+    background: white;
+}

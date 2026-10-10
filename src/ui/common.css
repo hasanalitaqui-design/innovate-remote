@@ -3,12 +3,12 @@ html {
     var(button): #0F6B6B;
     var(gray-bg): #F1F5F5;
     var(bg): white;
-    var(border): #ccc;
-    var(hover-border): #999;
-    var(text): #222;
+    var(border): #C9D8D8;
+    var(hover-border): #0F6B6B;
+    var(text): #0E2323;
     var(placeholder): #aaa;
-    var(lighter-text): #888;
-    var(light-text): #666;
+    var(lighter-text): #7C9090;
+    var(light-text): #5F7676;
     var(menu-hover): #DCEBEB;
     var(dark-red): #A72145;
     var(dark-yellow): #FBC732;
@@ -38,11 +38,13 @@ html.darktheme {
 body {
     margin: 0;
     color: color(text);
+    font-family: "Segoe UI", Tahoma, sans-serif;   /* Oct 9 2026: the Windows 10 build uses Inter; Segoe UI is the closest font every Windows 7 PC already has */
 }
 
 button.button {
-    height: 2em;
-    border-radius: 0.5em;
+    height: 2.4em;
+    border-radius: 0.6em;
+    font-weight: 600;
     background: color(button);
     color: color(bg);
     border-color: color(button);
@@ -88,9 +90,9 @@ button.link {
 
 input[type=text], input[type=password], input[type=number] {
     width: *;
-    font-size: 1.5em;
+    font-size: 1.4em;
     border-color: color(border);
-    border-radius: 0;
+    border-radius: 0.5em;
     color: color(text);
     padding-left: 0.5em;
     background: color(bg);
