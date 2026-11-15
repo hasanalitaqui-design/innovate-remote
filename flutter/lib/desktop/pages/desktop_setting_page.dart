@@ -69,7 +69,7 @@ class DesktopSettingPage extends StatefulWidget {
         !bind.isDisableSettings() &&
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) != 'Y')
       SettingsTabKey.safety,
-    // Innovate Remote: no Network tab (server settings are fixed) and no Account tab
+    // REMOTE: no Network tab (server settings are fixed) and no Account tab
     if (!bind.isIncomingOnly()) SettingsTabKey.display,
     if (isWindows &&
         !bind.isDisableSettings() &&
@@ -2542,7 +2542,7 @@ class _AboutState extends State<_About> {
       final scrollController = ScrollController();
       return SingleChildScrollView(
         controller: scrollController,
-        child: _Card(title: 'About Innovate Remote', children: [
+        child: _Card(title: 'About REMOTE', children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -2574,7 +2574,7 @@ class _AboutState extends State<_About> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Innovate Remote - private remote access, run by Innovate.\nPowered by Innovate Technologies.',
+                            'REMOTE - private remote access, run by Innovate.\nPowered by Innovate Technologies.',
                             style: const TextStyle(color: Colors.white),
                           ),
                           const SizedBox(height: 14),

@@ -1,6 +1,6 @@
-// Innovate Remote licence check (Oct 3 2026).
+// REMOTE licence check (Oct 3 2026).
 //
-// Every install of Innovate Remote is a licence. The installer registers this PC (its Remote ID) under a
+// Every install of REMOTE is a licence. The installer registers this PC (its Remote ID) under a
 // firm on license.taquiai.ai and writes the firm id into this app's options ("innovate-firm-id").
 // From then on the app asks the licence server "am I still allowed?" at start and every 30 minutes.
 // If Innovate suspends this one install (or the whole firm), the answer turns to "no" and this PC refuses
@@ -99,7 +99,7 @@ fn check_once_inner() -> bool {
                 // a "no" is final at once: it also wipes the remembered "yes"
                 std::fs::remove_file(stamp_path()).ok();
                 log::warn!(
-                    "Innovate Remote licence is not active: {}",
+                    "REMOTE licence is not active: {}",
                     v.get("reason").and_then(|r| r.as_str()).unwrap_or("unknown")
                 );
             }
@@ -247,4 +247,4 @@ pub fn start() {
 }
 
 /// The message shown when a connection is refused for licence reasons.
-pub const REFUSED: &str = "Innovate Remote licence is not active on this PC. Please contact Innovate.";
+pub const REFUSED: &str = "REMOTE licence is not active on this PC. Please contact Innovate.";

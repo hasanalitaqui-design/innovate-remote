@@ -1,4 +1,4 @@
-// Innovate Remote - updates (Oct 3 2026).
+// REMOTE - updates (Oct 3 2026).
 // InnovateUpdates      : the "Updates" box (Settings > General and Settings > About): this PC's build, the newest build, one-click update.
 // InnovateUpdateBanner : a slim teal bar at the top of the main window that appears only when a newer build exists.
 // The update itself is done by the same script the nightly task uses (Update-InnovateRemote.ps1), started with
@@ -50,7 +50,7 @@ Future<_UpdateInfo> _checkForUpdate() async {
 Future<String?> _startUpdate() async {
   final script = '$_stateDir\\Update-InnovateRemote.ps1';
   if (!File(script).existsSync()) {
-    return 'The update program is not set up on this PC yet. Run the Innovate Remote installer once, then try again.';
+    return 'The update program is not set up on this PC yet. Run the REMOTE installer once, then try again.';
   }
   // 1) Quietly: ask the nightly update task (it runs as SYSTEM) to run now. Needs no Windows permission prompt once the task lets users start it.
   try {
@@ -118,7 +118,7 @@ class _InnovateUpdatesState extends State<InnovateUpdates> {
   Future<void> _update() async {
     final err = await _startUpdate();
     setState(() => _msg = err ??
-        'Updating... Windows will ask for permission. The app closes and opens again when it is done; if it does not, open Innovate Remote from the Start menu.');
+        'Updating... Windows will ask for permission. The app closes and opens again when it is done; if it does not, open REMOTE from the Start menu.');
   }
 
   @override
@@ -127,7 +127,7 @@ class _InnovateUpdatesState extends State<InnovateUpdates> {
     final behind = i != null && i.behind;
     final String status = i == null
         ? _msg
-        : (behind ? 'An update is available.' : 'Innovate Remote is up to date.');
+        : (behind ? 'An update is available.' : 'REMOTE is up to date.');
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -241,7 +241,7 @@ class _InnovateUpdateBannerState extends State<InnovateUpdateBanner> {
             child: Text(
               _msg.isNotEmpty
                   ? _msg
-                  : 'A new version of Innovate Remote is available (build ${i.want}; this PC has build ${i.have}).',
+                  : 'A new version of REMOTE is available (build ${i.want}; this PC has build ${i.have}).',
               style: const TextStyle(
                   fontSize: 13.5,
                   color: Color(0xFF102A2A),

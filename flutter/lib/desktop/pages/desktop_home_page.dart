@@ -67,7 +67,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     ]));
   }
 
-  // Innovate Remote header bar (Innovate teal, logo, name) - restyled Oct 9 2026
+  // REMOTE header bar (Innovate teal, logo, name) - restyled Oct 9 2026
   Widget _innovateHeader() {
     return Container(
       height: 72,
@@ -100,7 +100,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Innovate Remote',
+              Text('REMOTE',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 19,
@@ -166,7 +166,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       ),
     ];
     if (!isIncomingOnly && !isOutgoingOnly) {
-      // Innovate Remote: the connection status sits under the ID and password (as in the design)
+      // REMOTE: the connection status sits under the ID and password (as in the design)
       children.add(Align(
         alignment: Alignment.centerLeft,
         child: OnlineStatusWidget().marginOnly(left: 14, top: 12, bottom: 8, right: 8),

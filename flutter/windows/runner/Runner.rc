@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "Innovate" "\0"
-            VALUE "FileDescription", "Innovate Remote Support" "\0"
+            VALUE "FileDescription", "REMOTE Support" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "rustdesk" "\0"
             VALUE "LegalCopyright", "Innovate. Based on RustDesk (AGPL-3.0)." "\0"
             VALUE "OriginalFilename", "rustdesk.exe" "\0"
-            VALUE "ProductName", "Innovate Remote" "\0"
+            VALUE "ProductName", "REMOTE" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
