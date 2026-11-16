@@ -70,6 +70,55 @@ class InnovateLicense {
     final dest = File(recordPath());
     if (await dest.exists()) await dest.delete();
     await tmp.rename(recordPath());
+    report(); // tell the licence server (best effort, in the background)
+  }
+
+  static const String _reportUrl = 'https://license.taquiai.ai/api/eula/accept';
+
+  static Future<bool> isReported() async {
+    try {
+      final j = jsonDecode(await File(recordPath()).readAsString());
+      return j['reported'] == true || j['reported'] == 'true';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // Central register: tells the licence server that this computer accepted (best effort, never blocks the window), then marks the local record as reported.
+  static Future<bool> report() async {
+    try {
+      final f = File(recordPath());
+      final rec = jsonDecode(await f.readAsString()) as Map<String, dynamic>;
+      final body = jsonEncode({
+        'product': app,
+        'version': rec['version'],
+        'token': rec['token'],
+        'computer': rec['computer'],
+        'user': rec['user'],
+        'accepted_at': rec['accepted_at'],
+      });
+      final client = HttpClient()
+        ..connectionTimeout = const Duration(seconds: 6);
+      try {
+        final req = await client
+            .postUrl(Uri.parse(_reportUrl))
+            .timeout(const Duration(seconds: 8));
+        req.headers.set('Content-Type', 'application/json');
+        req.headers.set('User-Agent', 'Innovate-eula/1');
+        req.add(utf8.encode(body));
+        final res = await req.close().timeout(const Duration(seconds: 8));
+        await res.drain<void>();
+        if (res.statusCode != 200) return false;
+      } finally {
+        client.close(force: true);
+      }
+      rec['reported'] = true;
+      rec['reported_at'] = DateTime.now().toIso8601String();
+      await f.writeAsString(jsonEncode(rec));
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   static bool _showing = false;
@@ -77,7 +126,11 @@ class InnovateLicense {
   // Shows the agreement (not dismissible) when this PC has no valid acceptance. Accept writes the record; Decline closes the app.
   static Future<void> ensure(BuildContext context) async {
     if (_showing) return;
-    if (await isAccepted()) return;
+    if (await isAccepted()) {
+      // accepted earlier (for example in the setup program, or while offline): make sure the licence server has it
+      if (!await isReported()) report();
+      return;
+    }
     if (!context.mounted) return;
     _showing = true;
     try {
