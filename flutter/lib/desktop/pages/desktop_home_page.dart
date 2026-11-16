@@ -13,6 +13,7 @@ import 'package:flutter_hbb/desktop/pages/connection_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_setting_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_tab_page.dart';
 import 'package:flutter_hbb/desktop/pages/innovate_home_page.dart';
+import 'package:flutter_hbb/desktop/pages/innovate_license_gate.dart';
 import 'package:flutter_hbb/desktop/widgets/update_progress.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/models/server_model.dart';
@@ -923,6 +924,10 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       });
     }
     WidgetsBinding.instance.addObserver(this);
+    // Nov 15 2026: the licence agreement must be read to the end and accepted once on this PC before REMOTE is used
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      InnovateLicense.ensure(context);
+    });
   }
 
   _updateWindowSize() {
