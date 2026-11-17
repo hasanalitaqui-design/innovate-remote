@@ -42,9 +42,9 @@ lazy_static::lazy_static! {
 }
 
 #[cfg(not(target_os = "android"))]
-const CLIPBOARD_GET_MAX_RETRY: usize = 3;
+const CLIPBOARD_GET_MAX_RETRY: usize = 10;      // Nov 16 2026: was 3 x 33 ms; a screenshot (Snipping Tool) keeps the clipboard open longer than that
 #[cfg(not(target_os = "android"))]
-const CLIPBOARD_GET_RETRY_INTERVAL_DUR: Duration = Duration::from_millis(33);
+const CLIPBOARD_GET_RETRY_INTERVAL_DUR: Duration = Duration::from_millis(60);
 
 #[cfg(not(target_os = "android"))]
 fn valid_rgba_dimensions(width: i32, height: i32, data_len: usize) -> Option<(usize, usize)> {

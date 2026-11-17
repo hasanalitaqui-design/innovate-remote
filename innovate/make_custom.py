@@ -4,7 +4,7 @@ Run:  python make_custom.py        -> writes <fork>/innovate/innovate_custom.txt
 import os, json, base64
 from nacl.signing import SigningKey
 
-BASE = "C:/Innovate/remote_build"
+BASE = os.environ.get("INNOVATE_REMOTE_BASE", "E:/Innovate/remote_build")
 FORK = BASE + "/innovate-remote"
 KEYDIR = BASE + "/signing"
 os.makedirs(KEYDIR, exist_ok=True)
@@ -39,6 +39,7 @@ settings = {
         "image-quality": "custom",
         "custom-image-quality": "85",
         "custom-fps": "30",
+        "allow-sync-clipboard-between-sessions": "Y",              # Nov 16 2026: copy in one remote window, paste in another (text); was off unless ticked on every PC
     },
 }
 raw = json.dumps(settings, separators=(",", ":")).encode()
