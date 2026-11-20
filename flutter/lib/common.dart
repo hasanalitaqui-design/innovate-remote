@@ -307,8 +307,10 @@ class MyTheme {
 
   //tooltip
   static TooltipThemeData tooltipTheme() {
+    // Nov 20 2026 (Taqui: 'when the mouse is on an icon it takes time to show what the icon is'): was 1.5 seconds before a tooltip appeared, now 0.2 seconds.
+    // The tooltips of the peer cards keep their own explicit waits.
     return TooltipThemeData(
-      waitDuration: Duration(seconds: 1, milliseconds: 500),
+      waitDuration: Duration(milliseconds: 200),
     );
   }
 

@@ -974,6 +974,27 @@ class _MobileActionMenu extends StatelessWidget {
   }
 }
 
+/// Nov 20 2026 (Taqui: the screen picture showed "2 | 1 | 3" and the number buttons "1 2 3"): the screens are numbered by POSITION, left to right (then top to bottom),
+/// everywhere in the toolbar, so the picture of the screens and the numbered buttons always agree. What is sent to the remote PC and opened is still the screen's own index.
+List<int> _displaysByPosition(PeerInfo pi) {
+  final order = List<int>.generate(pi.displays.length, (i) => i);
+  order.sort((a, b) {
+    final da = pi.displays[a];
+    final db = pi.displays[b];
+    final byX = da.x.compareTo(db.x);
+    if (byX != 0) return byX;
+    final byY = da.y.compareTo(db.y);
+    return byY != 0 ? byY : a.compareTo(b);
+  });
+  return order;
+}
+
+/// The number shown for screen [i] (1 = the leftmost screen).
+int _displayNumber(PeerInfo pi, int i) {
+  final n = _displaysByPosition(pi).indexOf(i);
+  return (n < 0 ? i : n) + 1;
+}
+
 class _MonitorCycle {
   final String id;
   final FFI ffi;
@@ -984,14 +1005,15 @@ class _MonitorCycle {
   int get _current => CurrentDisplayState.find(id).value;
   bool get _inRange => _current >= 0 && _current < total;
 
-  String get label => _inRange ? '${_current + 1}' : '*';
+  String get label => _inRange ? '${_displayNumber(_pi, _current)}' : '*';
   String get tooltip => '${translate('Switch display')} ($label/$total)';
 
   void next() {
     final t = total;
     if (t < 2) return;
-    final from = _inRange ? _current : -1;
-    final target = (from + 1) % t;
+    final order = _displaysByPosition(_pi);                       // the next screen to the right (the one after the last is the first)
+    final rank = _inRange ? order.indexOf(_current) : -1;
+    final target = order[(rank + 1) % t];
     final isChooseDisplayToOpenInNewWindow = _pi.isSupportMultiDisplay &&
         bind.sessionGetDisplaysAsIndividualWindows(sessionId: ffi.sessionId) ==
             'Y';
@@ -1136,7 +1158,7 @@ class _MonitorMenu extends StatelessWidget {
   }
 
   buildOneMonitorButton(i, curDisplay) => Text(
-        '${i + 1}',
+        '${_displayNumber(ffi.ffiModel.pi, i)}',
         style: TextStyle(
           color: i == curDisplay
               ? _ToolbarTheme.blueColor
@@ -1165,7 +1187,7 @@ class _MonitorMenu extends StatelessWidget {
                 ? ''
                 : isAllMonitors
                     ? 'All monitors'
-                    : '#{${i + 1}} monitor',
+                    : '#{${_displayNumber(pi, i)}} monitor',
             hMargin: isMulti ? null : 6,
             vMargin: isMulti ? null : 12,
             topLevel: false,
@@ -1198,7 +1220,7 @@ class _MonitorMenu extends StatelessWidget {
           );
         });
 
-    for (int i = 0; i < pi.displays.length; i++) {
+    for (final i in _displaysByPosition(pi)) {                     // left to right, like the picture of the screens
       monitorList.add(buildMonitorButton(i));
     }
     if (supportIndividualWindows && pi.displays.length > 1) {
@@ -1247,7 +1269,7 @@ class _MonitorMenu extends StatelessWidget {
             ),
             child: Center(
                 child: Text(
-              '${i + 1}',
+              '${_displayNumber(pi, i)}',
               style: TextStyle(
                 color: display.value == i
                     ? activeTextColor
