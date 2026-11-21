@@ -712,7 +712,8 @@ impl VideoQoS {
                 }
                 min.max(BR_MIN_HIGH_RESOLUTION)
             }
-            Quality::Low | Quality::Custom(_) => BR_MIN_HIGH_RESOLUTION,
+            Quality::Low => BR_MIN_HIGH_RESOLUTION,
+            Quality::Custom(target) => innovate_custom_min_ratio(target, ratio_1mbps),
         }
     }
 
@@ -837,6 +838,23 @@ impl VideoQoS {
         // Ensure fps stays within valid range
         self.fps = fps.clamp(MIN_FPS, highest_fps);
     }
+}
+
+// Innovate REMOTE build 41. A custom quality had no floor: on a slow or relayed link the
+// automatic bitrate could fall to a tenth of the base rate (about 0.2 Mbps at 1080p) and
+// text turned to mush, although "Best" keeps a floor. A custom quality at or above Best now
+// keeps one too: 40 percent of what was asked, and not more than about 2 Mbps so that a
+// weak link is still answered with a lower bitrate instead of a growing delay. Below Best
+// the viewer asked for a small stream and the old floor stays.
+fn innovate_custom_min_ratio(target: f32, ratio_1mbps: Option<f32>) -> f32 {
+    if target < BR_BEST {
+        return BR_MIN_HIGH_RESOLUTION;
+    }
+    let mut min = target / 2.5;
+    if let Some(ratio_1mbps) = ratio_1mbps {
+        min = min.min(ratio_1mbps * 2.0);
+    }
+    min.max(BR_MIN)
 }
 
 #[derive(Default, Debug, Clone)]

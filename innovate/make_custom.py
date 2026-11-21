@@ -36,6 +36,7 @@ settings = {
         "auto-disconnect-timeout": "15",                           # minutes idle -> session closes
         # Oct 9 2026: sharper picture (RustDesk default is "balanced" = soft text). The loader maps keys with "_" -> "-", so they MUST be written with dashes
         # (the first version used "image_quality" and was silently ignored; only custom-fps took effect).
+        # Nov 20 2026 (build 41): the three picture values below are superseded in code (src/common.rs, INNOVATE_PICTURE_QUALITY / _FPS = 125 / 30).
         "image-quality": "custom",
         "custom-image-quality": "85",
         "custom-fps": "30",

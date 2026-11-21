@@ -2357,7 +2357,79 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
     ThrottledInterval::new(i)
 }
 
+// Innovate REMOTE build 41. The picture defaults live here, not in the signed settings
+// text: that text needs the private signing key to change, and a custom.txt next to the
+// program (server installs) would bring the older, softer values back if it were read last.
+// Custom quality 125 = bitrate ratio 2.5 (the stock "Best" is 1.5, builds 26-40 used 1.7).
+pub const INNOVATE_PICTURE_QUALITY: i32 = 125;
+pub const INNOVATE_PICTURE_FPS: i32 = 30;
+
 pub fn load_custom_client() {
+    load_custom_client_signed();
+    let mut defaults = config::DEFAULT_DISPLAY_SETTINGS.write().unwrap();
+    for (k, v) in innovate_picture_settings() {
+        defaults.insert(k.to_owned(), v);
+    }
+}
+
+fn innovate_picture_settings() -> [(&'static str, String); 3] {
+    [
+        (keys::OPTION_IMAGE_QUALITY, "custom".to_owned()),
+        (
+            keys::OPTION_CUSTOM_IMAGE_QUALITY,
+            INNOVATE_PICTURE_QUALITY.to_string(),
+        ),
+        (keys::OPTION_CUSTOM_FPS, INNOVATE_PICTURE_FPS.to_string()),
+    ]
+}
+
+/// Once per Windows user: every PC already in the Recent list has its own saved picture
+/// settings ("balanced", or the 85 of builds 26-40), and the defaults above never reach a
+/// saved PC. This raises them, and drops the user's own stale "defaults for new PCs", so
+/// the sharper picture arrives without anyone opening a settings menu. A saved quality
+/// that is already higher is kept. The choice stays free afterwards.
+pub fn innovate_migrate_picture_settings() {
+    const KEY: &str = "innovate-picture-settings";
+    const VERSION: &str = "41";
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    ONCE.call_once(|| {
+        if LocalConfig::get_option(KEY) == VERSION {
+            return;
+        }
+        let mut user_default = config::UserDefaultConfig::load();
+        for (k, v) in innovate_picture_settings() {
+            // equal to the built-in default, so this removes a saved older value
+            user_default.set(k.to_owned(), v);
+        }
+        let mut peers = config::PeerConfig::peers(None);
+        // oldest first and every file rewritten: the Recent list is ordered by file time
+        peers.sort_by_key(|p| p.1);
+        let count = peers.len();
+        for (id, _, mut peer) in peers {
+            let saved = peer.custom_image_quality.first().copied().unwrap_or(0);
+            if peer.image_quality != "custom" || saved < INNOVATE_PICTURE_QUALITY {
+                peer.image_quality = "custom".to_owned();
+                peer.custom_image_quality = vec![INNOVATE_PICTURE_QUALITY];
+            }
+            let fps = peer
+                .options
+                .get(keys::OPTION_CUSTOM_FPS)
+                .and_then(|v| v.parse::<i32>().ok())
+                .unwrap_or(0);
+            if fps < INNOVATE_PICTURE_FPS {
+                peer.options.insert(
+                    keys::OPTION_CUSTOM_FPS.to_owned(),
+                    INNOVATE_PICTURE_FPS.to_string(),
+                );
+            }
+            peer.store(&id);
+        }
+        LocalConfig::set_option(KEY.to_owned(), VERSION.to_owned());
+        log::info!("picture settings of {count} saved PCs raised to the build 41 default");
+    });
+}
+
+fn load_custom_client_signed() {
     // Innovate Remote: the signed settings (name, our server, our server key) are built into the program
     read_custom_client(include_str!("../innovate/innovate_custom.txt").trim());
     #[cfg(debug_assertions)]

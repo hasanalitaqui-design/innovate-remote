@@ -928,6 +928,26 @@ fn run(vs: VideoService) -> ResultType<()> {
                         send_counter += 1;
                     }
                 }
+                if encoder.latency_free()
+                    && yuv.len() > 0
+                    && repeat_encode_counter < STATIC_REFINE_FRAMES
+                {
+                    repeat_encode_counter += 1;
+                    let send_conn_ids = refine_static_frame(
+                        display_idx,
+                        &sp,
+                        &yuv,
+                        ms,
+                        &mut encoder,
+                        recorder.clone(),
+                        capture_width,
+                        capture_height,
+                    )?;
+                    if !send_conn_ids.is_empty() {
+                        frame_controller.set_send(now, send_conn_ids);
+                        send_counter += 1;
+                    }
+                }
             }
             Err(err) => {
                 #[cfg(windows)]
@@ -1070,6 +1090,10 @@ fn get_encoder_config(
     _portable_service: bool,
     _source: VideoSource,
 ) -> EncoderCfg {
+    #[cfg(all(windows, feature = "vram"))]
+    if !innovate_gpu_texture_encode() {
+        VRamEncoder::set_not_use(_name.clone(), true);
+    }
     #[cfg(all(windows, feature = "vram"))]
     if _portable_service || c.is_gdi() || _source == VideoSource::Camera {
         log::info!("gdi:{}, portable:{}", c.is_gdi(), _portable_service);
@@ -1303,6 +1327,57 @@ fn handle_one_frame(
         }
     }
     Ok(send_conn_ids)
+}
+
+// Innovate REMOTE build 41. The encoders used on Windows return every frame at once, so
+// the loop above only feeds them when the screen changes, and the last frame of a change
+// (a window switch, a scroll) stays as soft as the rate control left it until something
+// else moves. Encoding that same frame a few more times lets the encoder spend the next
+// frames' bits on it: the still picture turns sharp within a fraction of a second. Once it
+// is sharp these frames are tiny.
+const STATIC_REFINE_FRAMES: usize = 6;
+
+fn refine_static_frame(
+    display: usize,
+    sp: &GenericService,
+    yuv: &[u8],
+    ms: i64,
+    encoder: &mut Encoder,
+    recorder: Arc<Mutex<Option<Recorder>>>,
+    width: usize,
+    height: usize,
+) -> ResultType<HashSet<i32>> {
+    sp.snapshot(|sps| {
+        if sps.has_subscribes() {
+            log::info!("switch due to new subscriber");
+            bail!("SWITCH");
+        }
+        Ok(())
+    })?;
+    // An encoder may return nothing for a frame it has nothing to add to. That is not a
+    // failure and must not count toward switching the encoder off.
+    let Ok(mut vf) = encoder.encode_to_message(EncodeInput::YUV(yuv), ms) else {
+        return Ok(Default::default());
+    };
+    vf.display = display as _;
+    let mut msg = Message::new();
+    msg.set_video_frame(vf);
+    recorder
+        .lock()
+        .unwrap()
+        .as_mut()
+        .map(|r| r.write_message(&msg, width, height));
+    Ok(sp.send_video_frame(msg))
+}
+
+// Innovate REMOTE build 41. Encoding straight from the GPU texture gives the loop no copy
+// of the frame to refine (see refine_static_frame) and makes a screenshot switch encoders
+// first. The same hardware encoders (NVENC, QuickSync, AMF) are used through the pixel
+// path instead, as on Windows 7 and in GDI capture. Host option
+// innovate-gpu-texture-encode=Y brings the texture path back.
+#[cfg(all(windows, feature = "vram"))]
+fn innovate_gpu_texture_encode() -> bool {
+    Config::get_option("innovate-gpu-texture-encode") == "Y"
 }
 
 #[inline]

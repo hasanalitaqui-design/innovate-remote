@@ -2978,6 +2978,7 @@ impl LoginConfigHandler {
 
         self.id = id;
         self.conn_type = conn_type;
+        crate::innovate_migrate_picture_settings();
         let config = self.load_config();
         self.remember = !config.password.is_empty();
         self.config = config;
