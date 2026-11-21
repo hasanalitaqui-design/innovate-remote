@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 const _stateDir = r'C:\ProgramData\Innovate\Remote';
-const _latestUrl = 'https://license.taquiai.ai/api/remote/latest';
+// Nov 21 2026 (build 42): domain move - new licence host first, old host as fallback (network error, timeout, TLS or 5xx).
+const _licenseHosts = ['license.innovateworkflow.com', 'license.taquiai.ai'];
 
 class _UpdateInfo {
   final int have;
@@ -34,16 +35,23 @@ Future<_UpdateInfo> _checkForUpdate() async {
     final f = File('$_stateDir\\build.txt');
     have = f.existsSync() ? (int.tryParse(f.readAsStringSync().trim()) ?? 0) : 0;
   }
-  final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
-  try {
-    final req = await client.getUrl(Uri.parse(_latestUrl));
-    final resp = await req.close();
-    final body = await resp.transform(utf8.decoder).join();
-    final j = jsonDecode(body) as Map<String, dynamic>;
-    return _UpdateInfo((have), (j['build'] ?? 0) as int, (j['notes'] ?? '') as String);
-  } finally {
-    client.close();
+  Object? lastError;
+  for (final host in _licenseHosts) {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
+    try {
+      final req = await client.getUrl(Uri.parse('https://$host/api/remote/latest'));
+      final resp = await req.close();
+      final body = await resp.transform(utf8.decoder).join();
+      if (resp.statusCode >= 500) throw HttpException('server error ${resp.statusCode}');
+      final j = jsonDecode(body) as Map<String, dynamic>;
+      return _UpdateInfo((have), (j['build'] ?? 0) as int, (j['notes'] ?? '') as String);
+    } catch (e) {
+      lastError = e; // try the next host
+    } finally {
+      client.close();
+    }
   }
+  throw lastError ?? const HttpException('licence server not reachable');
 }
 
 /// Starts the updater with Windows' permission prompt. Returns a message when it cannot start, else null.
@@ -60,7 +68,7 @@ Future<String?> _startUpdate() async {
     // fall through to the prompt route
   }
   // 2) With Windows' permission prompt: fetch the newest update script first (it also sets who may start the task, so next time is quiet), then run it.
-  final cmd = "try { Invoke-WebRequest -UseBasicParsing -Uri https://license.taquiai.ai/get/Update-InnovateRemote.ps1 -OutFile '$script' } catch {}; & '$script'";
+  final cmd = "try { Invoke-WebRequest -UseBasicParsing -Uri https://license.innovateworkflow.com/get/Update-InnovateRemote.ps1 -OutFile '$script' } catch { try { Invoke-WebRequest -UseBasicParsing -Uri https://license.taquiai.ai/get/Update-InnovateRemote.ps1 -OutFile '$script' } catch {} }; & '$script'";
   final bytes = <int>[];
   for (final u in cmd.codeUnits) {
     bytes.add(u & 0xff);

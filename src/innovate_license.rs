@@ -1,7 +1,7 @@
 // REMOTE licence check (Oct 3 2026).
 //
 // Every install of REMOTE is a licence. The installer registers this PC (its Remote ID) under a
-// firm on license.taquiai.ai and writes the firm id into this app's options ("innovate-firm-id").
+// firm on license.innovateworkflow.com (license.taquiai.ai as fallback) and writes the firm id into this app's options ("innovate-firm-id").
 // From then on the app asks the licence server "am I still allowed?" at start and every 30 minutes.
 // If Innovate suspends this one install (or the whole firm), the answer turns to "no" and this PC refuses
 // incoming connections and cannot start outgoing ones. A short outage never locks a PC out: the last
@@ -12,7 +12,27 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Once};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-const VERIFY_URL: &str = "https://license.taquiai.ai/api/remote/verify";
+const VERIFY_PATH: &str = "/api/remote/verify";
+// Nov 21 2026 (build 42): domain move. The new licence host is tried first; the old one only answers when the new one cannot be reached or fails with a server error (5xx).
+// A normal refusal (4xx, "allowed": false) is a real answer and is never retried on the other host. Remove the old name when every PC runs build 42 or newer.
+const LICENSE_HOSTS: [&str; 2] = ["license.innovateworkflow.com", "license.taquiai.ai"];
+
+/// GET `path` on the licence host (new name first, old name as fallback on network error / DNS / TLS / 5xx).
+fn licence_get(path: &str, secs: u64) -> Result<reqwest::blocking::Response, reqwest::Error> {
+    let (last, first) = LICENSE_HOSTS.split_last().unwrap();
+    for host in first {
+        let url = format!("https://{}{}", host, path);
+        let client = crate::hbbs_http::create_http_client_with_url(&url);
+        match client.get(&url).timeout(Duration::from_secs(secs)).send() {
+            Ok(r) if !r.status().is_server_error() => return Ok(r),
+            Ok(r) => log::warn!("licence host {} answered {}, trying the old host", host, r.status()),
+            Err(e) => log::warn!("licence host {} not reachable ({}), trying the old host", host, e),
+        }
+    }
+    let url = format!("https://{}{}", last, path);
+    let client = crate::hbbs_http::create_http_client_with_url(&url);
+    client.get(&url).timeout(Duration::from_secs(secs)).send()
+}
 const GRACE_SECS: u64 = 72 * 3600;
 const CHECK_EVERY: Duration = Duration::from_secs(30 * 60);
 const RETRY_EVERY: Duration = Duration::from_secs(120);
@@ -74,15 +94,14 @@ fn check_once_inner() -> bool {
         ALLOWED.store(false, Ordering::SeqCst);
         return false; // asked again in 2 minutes: the installer may be about to write the firm id
     }
-    let url = format!(
+    let path = format!(
         "{}?firm_id={}&remote_id={}&version={}",
-        VERIFY_URL,
+        VERIFY_PATH,
         firm,
         my_id(),
         env!("CARGO_PKG_VERSION")
     );
-    let client = crate::hbbs_http::create_http_client_with_url(&url);
-    let resp = match client.get(&url).timeout(Duration::from_secs(20)).send() {
+    let resp = match licence_get(&path, 20) {
         Ok(r) => r,
         Err(e) => {
             log::warn!("licence check could not reach the server: {}", e);
@@ -153,14 +172,13 @@ pub fn report_session(direction: &'static str) {
             log::warn!("session report ({}) skipped: no firm id on this PC", direction);
             return;
         }
-        let url = format!(
-            "https://license.taquiai.ai/api/remote/session?firm_id={}&remote_id={}&direction={}",
+        let path = format!(
+            "/api/remote/session?firm_id={}&remote_id={}&direction={}",
             firm,
             my_id(),
             direction
         );
-        let client = crate::hbbs_http::create_http_client_with_url(&url);
-        match client.get(&url).timeout(Duration::from_secs(15)).send() {
+        match licence_get(&path, 15) {
             Ok(r) => log::info!("session report ({}) sent: {}", direction, r.status()),
             Err(e) => log::warn!("session report ({}) not sent: {}", direction, e),
         }
@@ -178,19 +196,18 @@ pub struct SessionGuard {
 fn session_url(kind: &str, firm: &str, rid: &str, sid: &str, direction: &str) -> String {
     match kind {
         "start" => format!(
-            "https://license.taquiai.ai/api/remote/session?firm_id={}&remote_id={}&direction={}&sid={}",
+            "/api/remote/session?firm_id={}&remote_id={}&direction={}&sid={}",
             firm, rid, direction, sid
         ),
         other => format!(
-            "https://license.taquiai.ai/api/remote/session/{}?sid={}&remote_id={}",
+            "/api/remote/session/{}?sid={}&remote_id={}",
             other, sid, rid
         ),
     }
 }
 
-fn session_call(url: String) {
-    let client = crate::hbbs_http::create_http_client_with_url(&url);
-    match client.get(&url).timeout(Duration::from_secs(10)).send() {
+fn session_call(path: String) {
+    match licence_get(&path, 10) {
         Ok(r) => log::info!("session call sent: {}", r.status()),
         Err(e) => log::warn!("session call not sent: {}", e),
     }

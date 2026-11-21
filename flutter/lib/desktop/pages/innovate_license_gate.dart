@@ -73,7 +73,11 @@ class InnovateLicense {
     report(); // tell the licence server (best effort, in the background)
   }
 
-  static const String _reportUrl = 'https://license.taquiai.ai/api/eula/accept';
+  // Nov 21 2026 (build 42): domain move - new licence host first, old host as fallback (network error, timeout, TLS or 5xx only; a 4xx is a real answer).
+  static const List<String> _reportUrls = [
+    'https://license.innovateworkflow.com/api/eula/accept',
+    'https://license.taquiai.ai/api/eula/accept',
+  ];
 
   static Future<bool> isReported() async {
     try {
@@ -97,21 +101,28 @@ class InnovateLicense {
         'user': rec['user'],
         'accepted_at': rec['accepted_at'],
       });
-      final client = HttpClient()
-        ..connectionTimeout = const Duration(seconds: 6);
-      try {
-        final req = await client
-            .postUrl(Uri.parse(_reportUrl))
-            .timeout(const Duration(seconds: 8));
-        req.headers.set('Content-Type', 'application/json');
-        req.headers.set('User-Agent', 'Innovate-eula/1');
-        req.add(utf8.encode(body));
-        final res = await req.close().timeout(const Duration(seconds: 8));
-        await res.drain<void>();
-        if (res.statusCode != 200) return false;
-      } finally {
-        client.close(force: true);
+      var status = 0;
+      for (final url in _reportUrls) {
+        final client = HttpClient()
+          ..connectionTimeout = const Duration(seconds: 6);
+        try {
+          final req = await client
+              .postUrl(Uri.parse(url))
+              .timeout(const Duration(seconds: 8));
+          req.headers.set('Content-Type', 'application/json');
+          req.headers.set('User-Agent', 'Innovate-eula/1');
+          req.add(utf8.encode(body));
+          final res = await req.close().timeout(const Duration(seconds: 8));
+          await res.drain<void>();
+          status = res.statusCode;
+        } catch (_) {
+          status = 0; // not reachable: try the next host
+        } finally {
+          client.close(force: true);
+        }
+        if (status != 0 && status < 500) break; // a real answer (also a 4xx) is final
       }
+      if (status != 200) return false;
       rec['reported'] = true;
       rec['reported_at'] = DateTime.now().toIso8601String();
       await f.writeAsString(jsonEncode(rec));
